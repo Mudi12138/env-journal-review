@@ -14,11 +14,12 @@ command takes `--run <run directory>`; all files live there, so any step can be 
 
 ## 0. Before you start
 
-- **Index pack.** `$ENVR index-info` must print the pack details. If it says the pack is missing,
-  run `$ENVR index-download` (about 690 MB, once; it resumes if interrupted and verifies every
-  file). Tell the user before starting the download.
-- **Python packages:** `pip install -r <this skill folder>/requirements.txt`. The first search
+- **Python.** Run `$ENVR index-info` first. If it reports missing packages, use a Python that
+  has them (a project virtual environment, if the user has one) as the `python` in `ENVR`;
+  otherwise ask the user before running the install command it prints. The first search
   downloads the embedding model `BAAI/bge-large-en-v1.5` (~1.3 GB).
+- **Index pack.** If `index-info` says the pack is missing, tell the user and run
+  `$ENVR index-download` (about 690 MB, once; it resumes if interrupted and verifies every file).
 - Ask for the **target journal** if the user has not named one. Ask for the **latest year of
   literature** only if the manuscript is already published (use the year before publication);
   otherwise the default (this year) is right.

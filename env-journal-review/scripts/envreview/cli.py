@@ -17,6 +17,7 @@ files in one run directory, so any step can be repeated.
   envreview profile-brief  --run DIR                     -> agent writes profile_note.md
   envreview report         --run DIR
   envreview index-info [--verify]
+  envreview index-download                               -> fetch the index pack (once)
 
 Output is JSON on stdout unless a command prints instructions for the agent.
 """
@@ -24,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import importlib.util
 import json
 import re
 import sys
@@ -43,6 +45,22 @@ RECS = ["reject and resubmit", "minor revision", "major revision", "acceptance",
         "accept", "reject"]
 
 _INDEX = None
+# import name -> pip name, as in requirements.txt
+NEEDED = {"numpy": "numpy", "pandas": "pandas", "pyarrow": "pyarrow", "scipy": "scipy",
+          "torch": "torch", "transformers": "transformers", "fitz": "pymupdf",
+          "docx": "python-docx", "jsonschema": "jsonschema", "huggingface_hub": "huggingface_hub"}
+
+
+def check_packages():
+    """Fail early, with the install command for *this* interpreter, if a package is missing.
+
+    Hosts often have several Pythons; without this the first sign is a traceback mid-review."""
+    missing = [pip for mod, pip in NEEDED.items() if importlib.util.find_spec(mod) is None]
+    if missing:
+        req = Path(__file__).resolve().parents[2] / "requirements.txt"
+        sys.exit(f"Missing Python packages for {sys.executable}: {', '.join(missing)}.\n"
+                 f"Install them with:\n  \"{sys.executable}\" -m pip install -r \"{req}\"\n"
+                 "or run envreview with a Python that already has them.")
 
 
 def index():
@@ -491,6 +509,7 @@ def main(argv=None):
     p.add_argument("--topics")
 
     a = ap.parse_args(argv)
+    check_packages()
     {"start": cmd_start, "editor-pack": cmd_editor_pack, "editor-prompt": cmd_editor_prompt,
      "editor-decide": cmd_editor_decide, "reviewer-brief": cmd_reviewer_brief,
      "search": cmd_search, "fulltext": cmd_fulltext, "check": cmd_check,

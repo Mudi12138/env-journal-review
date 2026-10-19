@@ -170,7 +170,7 @@ class LocalIndex:
         """The n closest of the 60 subject topics (embedding vs topic centroids) and the
         manuscript's main methods, voted by its nearest published neighbours."""
         z = np.load(self.root / "topic_centroids.npz", allow_pickle=True)
-        codes, labels, cvecs = list(z["codes"]), list(z["labels"]), z["vecs"]
+        codes, labels, cvecs = [str(c) for c in z["codes"]], [str(x) for x in z["labels"]], z["vecs"]
         v = self.encode([f"{title}. {abstract}"], query=False)[0]   # passage vs passage
         sims = cvecs @ v
         order = np.argsort(-sims)
