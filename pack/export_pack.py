@@ -1,7 +1,7 @@
 """Build the distributable index pack from the Katana corpus (maintainer tool).
 
-Runs on Katana (see export_pack.pbs). Reads the retrieval index in
-/srv/scratch/$USER/envtop/retrieval and the parsed full texts in .../envtop/fulltext,
+Runs on Katana (see export_pack.pbs). Reads the retrieval index in $ENVTOP_ROOT/retrieval and
+the parsed full texts in $ENVTOP_ROOT/fulltext (default ENVTOP_ROOT: /srv/scratch/$USER/envtop),
 and writes one self-contained directory plus a tar of it:
 
   env-journal-index-<version>/
@@ -20,6 +20,7 @@ The skill reads this directory locally; nothing at run time depends on Katana.
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sqlite3
 import tarfile
@@ -30,7 +31,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path("/srv/scratch/$USER/envtop")
+ROOT = Path(os.path.expandvars(os.environ.get("ENVTOP_ROOT", "/srv/scratch/$USER/envtop")))
 RET = ROOT / "retrieval"
 KEEP = ["DOI", "title", "abstract", "journal_std", "journal", "year", "doctype", "category",
         "category_label", "group", "group_name", "research_purpose_label",

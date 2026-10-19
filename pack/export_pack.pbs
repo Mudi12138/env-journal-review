@@ -3,12 +3,14 @@
 #PBS -l select=1:ncpus=4:mem=24gb
 #PBS -l walltime=02:00:00
 #PBS -j oe
-#PBS -o /srv/scratch/$USER/envtop/pack/export_pack.log
+#PBS -o export_pack.log
 
 # CPU only: copies the retrieval index, computes topic centroids and compresses ~40k
-# full texts into one SQLite file, then tars the pack.
+# full texts into one SQLite file, then tars the pack. Submit from the folder holding
+# export_pack.py; set ENVTOP_ROOT and PYTHON if they differ from the defaults below.
 set -e
-mkdir -p /srv/scratch/$USER/envtop/pack
-cd /srv/scratch/$USER/envtop/pack
-/srv/scratch/$USER/my_env1/bin/python export_pack.py --version v1
-ls -la /srv/scratch/$USER/envtop/pack /srv/scratch/$USER/envtop/pack/env-journal-index-v1
+cd "$PBS_O_WORKDIR"
+export ENVTOP_ROOT="${ENVTOP_ROOT:-/srv/scratch/$USER/envtop}"
+mkdir -p "$ENVTOP_ROOT/pack"
+"${PYTHON:-python3}" export_pack.py --version v1
+ls -la "$ENVTOP_ROOT/pack" "$ENVTOP_ROOT/pack/env-journal-index-v1"
