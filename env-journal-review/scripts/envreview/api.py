@@ -26,7 +26,7 @@ EDITOR_QUERY_SYS = """You are the handling editor at {journal}. Before judging a
 search the journal-level literature for the work closest to what it claims as new.
 
 Write two or three search queries in English, as natural-language sentences, and three to six
-precise terms for an exact-match search. They will be run against the titles and abstracts of
+precise terms for an exact-match search (a generic term found in hundreds of abstracts is ignored). They will be run against the titles and abstracts of
 about 40,000 research papers from seven leading environmental journals."""
 
 

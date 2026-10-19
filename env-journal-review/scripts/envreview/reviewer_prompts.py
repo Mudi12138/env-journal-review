@@ -35,7 +35,8 @@ Write two or three queries in English, as natural-language sentences rather than
 most of them should aim at the closest prior work.
 They will be embedded and searched against the titles and abstracts of about 40,000 research
 papers from seven leading environmental journals. Also give three to six precise English terms for
-an exact-match search of the same corpus."""
+an exact-match search of the same corpus; a generic term that appears in hundreds of abstracts
+is ignored."""
 
 QUERY_SCHEMA = {"name": "queries", "strict": True, "schema": {
     "type": "object", "additionalProperties": False, "required": ["queries", "phrases"],

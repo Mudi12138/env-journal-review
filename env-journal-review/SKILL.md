@@ -36,7 +36,9 @@ For a published manuscript pass its DOI with `--exclude <doi>` so it cannot revi
 ## 2. Editor's screening (send out or reject)
 
 1. Read the manuscript and write 2–3 search queries (natural-language sentences) plus 3–6 exact
-   terms that would find the work closest to its central claim. Then:
+   terms that would find the work closest to its central claim (specific terms such as a method
+   or model name; generic ones like "wastewater treatment" match thousands of papers and are
+   skipped). Then:
    `$ENVR editor-pack --run <dir> --query "..." --query "..." --phrase "..."`
 2. `$ENVR editor-prompt --run <dir>` writes `editor/<journal>/system.md`, `user.md` and
    `schema.json`. **In a fresh context** (a subagent if you can start one), follow `system.md`

@@ -1,11 +1,11 @@
 """Local access to the index pack: search, full text by DOI, and reviewer-role selection.
 
-Ported from the Katana tools (retrieval/katana/search.py, reviewer/katana/pick_roles.py) so a
-local run returns the same results as the original pipeline. Three retrieval paths are fused
-by reciprocal-rank fusion:
+Ported from the original pipeline's retrieval and reviewer-role tools. Three retrieval paths
+are fused by reciprocal-rank fusion:
   emb     one ranking per natural-language query (bge-large-en-v1.5, query prefix applied)
   bm25    lexical ranking over title + abstract
-  phrase  exact substring match over title + abstract, newest first
+  phrase  exact substring match over title + abstract, newest first; a phrase matching more
+          papers than one path keeps (per_path) is skipped as too common
 Filters (publication year, excluded DOIs) are applied before ranking.
 """
 from __future__ import annotations
@@ -50,6 +50,7 @@ class LocalIndex:
         self.doi = self.d.DOI.str.lower().to_numpy()
         self.low = (self.d.title.fillna("") + " " + self.d.abstract.fillna("")).str.lower().to_numpy()
         self._tok = self._model = None
+        self.skipped_phrases = []
 
     # ---- encoder ---------------------------------------------------------------
     def encode(self, texts: list[str], query: bool) -> np.ndarray:
@@ -101,6 +102,7 @@ class LocalIndex:
                 scores[i] += 1.0 / (RRF_K + r + 1)
 
         queries = list(queries or [])
+        self.skipped_phrases = []            # (phrase, hits) too common to rank; read by the CLI
         if queries:
             qv = self.encode(queries, query=True)
             for qi in range(len(queries)):
@@ -117,7 +119,13 @@ class LocalIndex:
                 continue
             hit = np.fromiter((p in t for t in self.low), bool, len(self.low)) & mask
             idx = np.where(hit)[0]
-            add(idx[np.argsort(-self.year[idx])][:per_path], f'phrase:"{p}"')
+            if len(idx) > per_path:
+                # "wastewater treatment" matches ~3,000 papers: not an exact-term signal, and
+                # which of them survive the cut would depend only on row order
+                self.skipped_phrases.append((p, len(idx)))
+                continue
+            order = np.lexsort((self.doi[idx], -self.year[idx]))    # newest first, then DOI
+            add(idx[order], f'phrase:"{p}"')
 
         order = sorted(scores, key=lambda i: -scores[i])[:topk]
         return [self.record(i, why_retrieved="; ".join(

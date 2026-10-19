@@ -107,8 +107,9 @@ def cmd_editor_pack(a):
     if a.query:
         run.write_json("editor/queries.json", {"queries": a.query, "phrases": a.phrase or []})
     q = run.read_json("editor/queries.json")
-    wide = index().search(q["queries"], q.get("phrases", []), before=st["before"],
-                          exclude=st["exclude"], topk=100, per_path=300)
+    ix = index()
+    wide = ix.search(q["queries"], q.get("phrases", []), before=st["before"],
+                     exclude=st["exclude"], topk=100, per_path=300)
     dist = {}
     for h in wide:
         dist[h["journal"]] = dist.get(h["journal"], 0) + 1
@@ -119,7 +120,15 @@ def cmd_editor_pack(a):
             "journal_distribution_top100": dist, "hits": wide[:20]}
     run.write_json("editor/pack.json", pack)
     out({"pack": str(run.path("editor/pack.json")), "hits": len(pack["hits"]),
-         "top_hits": [f"{h['year']} {h['journal']}: {h['title'][:90]}" for h in pack["hits"][:8]]})
+         "top_hits": [f"{h['year']} {h['journal']}: {h['title'][:90]}" for h in pack["hits"][:8]],
+         **_skipped(ix)})
+
+
+def _skipped(ix):
+    """Phrases the index ignored because they match too many papers to be an exact-term signal."""
+    if not ix.skipped_phrases:
+        return {}
+    return {"phrases_skipped_as_too_common": [f'"{p}" ({n} papers)' for p, n in ix.skipped_phrases]}
 
 
 def _editor_inputs(run, jid):
@@ -226,8 +235,12 @@ def cmd_search(a):
     st = run.state
     d = f"seats/{a.seat}"
     q = run.read_json(f"{d}/queries.json")
-    ranked = index().search(q["queries"], q.get("phrases", []), before=st["before"],
-                            exclude=st["exclude"], topk=60, per_path=300)
+    ix = index()
+    ranked = ix.search(q["queries"], q.get("phrases", []), before=st["before"],
+                       exclude=st["exclude"], topk=60, per_path=300)
+    if ix.skipped_phrases:
+        say("Note: " + "; ".join(_skipped(ix)["phrases_skipped_as_too_common"])
+            + " matched too many papers and were left out of the exact-term search.")
     cands = [h for h in ranked if h["has_fulltext"]][:N_SCREEN]
     run.write_json(f"{d}/candidates.json", cands)
     run.path(d, "candidates.md").write_text(_cands_block(cands), encoding="utf-8")
