@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "journal_id": "environmental_science_technology",
+  "display_name": "Environmental Science & Technology",
+  "retrieved_at": "2026-09-22",
+  "scope": {
+    "text_mode": "source-grounded concise normalization",
+    "text": "Environmental Science & Technology publishes rigorous, robust, significant, broadly relevant, and generalizable research for a multidisciplinary environmental audience. Its scope centres on complex environmental phenomena, especially fate, transport, and transformation in natural and engineered systems, and on solutions to critical environmental problems. Chemical, biological, physical, mathematical, and computational work fits when it is directly relevant to understanding, protecting, restoring, or managing the natural environment and clearly establishes broad environmental relevance.",
+    "text_sha256": "2bc0c90c569778e561eadc7f990b08e2f9818d43006a3b0bec332d03aa5ac445",
+    "official_excerpts": [
+      {
+        "source_ref": "author_guidelines",
+        "text": "significant, broadly relevant, and generalizable research"
+      }
+    ],
+    "inclusions": [
+      "Biogeochemical cycling",
+      "Bioremediation and biotechnology",
+      "Environmental data science",
+      "Ecotoxicology and public health",
+      "Energy and climate",
+      "Occurrence, fate, transport, transformation, and effects of contaminants",
+      "Physico-chemical treatment and resource recovery",
+      "Sustainable systems"
+    ],
+    "official_exclusions_or_boundaries": [
+      "Routine data or already well-understood topics without important new environmental insight",
+      "Location-specific monitoring conclusions that do not generalize or transfer",
+      "Catalyst, material, analytical, or chemical-engineering work that does not establish primary environmental importance",
+      "Treatment studies limited to kinetics or treatability without mechanism or a process model"
+    ],
+    "source_refs": [
+      "author_guidelines"
+    ]
+  },
+  "content_types": {
+    "capture_completeness": "full",
+    "absence_is_not_exclusion": false,
+    "primary_research": [
+      "Research Article",
+      "Policy Analysis"
+    ],
+    "non_primary_or_commentary": [
+      "Feature",
+      "Viewpoint",
+      "Review",
+      "Spotlight",
+      "Perspective",
+      "Letter to the Editor",
+      "Correspondence/Rebuttal"
+    ],
+    "official_excerpts": [
+      {
+        "source_ref": "author_guidelines",
+        "text": "Research Articles, Features, Viewpoints, Reviews, Policy Analysis, Spotlights, Perspectives, Letters to the Editor, and Correspondence/Rebuttals."
+      }
+    ],
+    "submission_notes": [
+      "Research Articles must report original research with a definable impact on environmental chemistry, science, technology, or policy and explain novelty, environmental relevance, and reader interest.",
+      "Policy Analysis contributes new insight at the science, engineering, and public-policy interface and is peer reviewed.",
+      "Viewpoints do not include new scientific data; Reviews are comprehensive and analytical rather than catalogues; Perspectives are focused personal reviews and can be submitted without prior approval."
+    ],
+    "source_refs": [
+      "author_guidelines"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "author_guidelines",
+      "source_type": "official_author_guidelines_scope_and_content_types",
+      "url": "https://researcher-resources.acs.org/publish/author_guidelines?coden=esthag",
+      "publisher_domain": "researcher-resources.acs.org",
+      "retrieved_at": "2026-09-22"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "journal_id": "nature_water",
+  "display_name": "Nature Water",
+  "retrieved_at": "2026-09-22",
+  "scope": {
+    "text_mode": "source-grounded concise normalization",
+    "text": "Nature Water covers research on the evolving relationship between society and water resources across the natural sciences, engineering, and social sciences, with particular interest in interdisciplinary work. It seeks studies that affect fundamental understanding, practical technological application, or policy implementation. Its remit is fundamentally freshwater-focused: desalination, resource recovery or reclamation, ocean processes affecting freshwater availability, and coastal work with a strong demonstrable freshwater link can fit; work centred on marine biology, wave or tidal energy, broad ocean pollution, or toxicology without a direct water-environment connection does not.",
+    "text_sha256": "d7a44b989ff0794526dcee75ef37c2f8ffe7e1b470baa623699488fc224d9f00",
+    "official_excerpts": [
+      {
+        "source_ref": "aims_scope",
+        "text": "Publishing monthly, Nature Water covers all aspects of research that are connected to this evolving relationship between society and water resources."
+      },
+      {
+        "source_ref": "remit_clarification_2026",
+        "text": "To be explicit, Nature Water is fundamentally a journal about freshwater."
+      }
+    ],
+    "inclusions": [
+      "Water resources and hydrology",
+      "Water pollution, contaminant analysis, ecotoxicology in water, and remediation",
+      "Water and wastewater treatment, desalination, reuse, and resource recovery",
+      "Water infrastructure, sanitation, public health, governance, management, security, economics, policy, and justice",
+      "Interdisciplinary natural-science, engineering, and social-science research on society-water relationships"
+    ],
+    "official_exclusions_or_boundaries": [
+      "Toxicology without a direct connection to water environments",
+      "Marine biology, wave or tidal energy, and ocean pollution without a strong freshwater-system link",
+      "Seawater work that is unrelated to freshwater production, recovery, reclamation, or freshwater-cycle processes"
+    ],
+    "source_refs": [
+      "aims_scope",
+      "remit_clarification_2026"
+    ]
+  },
+  "content_types": {
+    "capture_completeness": "full",
+    "absence_is_not_exclusion": false,
+    "primary_research": [
+      "Article",
+      "Analysis"
+    ],
+    "non_primary_or_commentary": [
+      "Correspondence",
+      "Review",
+      "Perspective",
+      "Comment",
+      "Matters Arising",
+      "News & Views",
+      "Policy Brief",
+      "Feature",
+      "Q&A",
+      "World View"
+    ],
+    "official_excerpts": [
+      {
+        "source_ref": "content_types",
+        "text": "Nature Water will publish the following articles: Article, Analysis, Correspondence, Review, Perspective, Comment, Matters Arising, News & Views, Policy Brief, Feature, Q&A, World view."
+      }
+    ],
+    "submission_notes": [
+      "The official page states that original research is published in the Article format; an Article must report a substantial advance in fundamental understanding, technological capability, or societal implication of water-related research.",
+      "Analysis covers new analysis of existing or comparative data, new simulation or modelling, and systematic review or meta-analysis leading to broad, arresting conclusions.",
+      "Review is usually commissioned; a presubmission enquiry with synopsis is advised. Perspective may not contain primary research data."
+    ],
+    "source_refs": [
+      "content_types"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "aims_scope",
+      "source_type": "official_aims_scope",
+      "url": "https://www.nature.com/natwater/aims",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    },
+    {
+      "source_id": "remit_clarification_2026",
+      "source_type": "official_editorial_scope_clarification",
+      "url": "https://www.nature.com/articles/s44221-026-00588-y",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    },
+    {
+      "source_id": "content_types",
+      "source_type": "official_content_types",
+      "url": "https://www.nature.com/natwater/content",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    }
+  ]
+}

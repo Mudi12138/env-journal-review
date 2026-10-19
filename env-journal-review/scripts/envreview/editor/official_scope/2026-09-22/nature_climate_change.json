@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "journal_id": "nature_climate_change",
+  "display_name": "Nature Climate Change",
+  "retrieved_at": "2026-09-22",
+  "scope": {
+    "text_mode": "source-grounded concise normalization",
+    "text": "Nature Climate Change publishes highly significant research on contemporary global climate change, including its nature, underlying causes, impacts, and wider implications for the economy, policy, society, and the world at large. It covers original research across natural and social sciences and encourages interdisciplinary synthesis. Palaeoclimate studies fit only when they shed significant new light on the nature, causes, or impacts of current climate change.",
+    "text_sha256": "71c3fe78005627ab1376af02dfc02fec4ee7bbaeed0c83c9ee08afb1dc62aa07",
+    "official_excerpts": [
+      {
+        "source_ref": "aims_scope",
+        "text": "the most significant and cutting-edge research on the nature, underlying causes or impacts of global climate change and its implications for the economy, policy"
+      }
+    ],
+    "inclusions": [
+      "Adaptation, mitigation, impacts, and vulnerability",
+      "Atmospheric, cryospheric, ecological, hydrological, oceanographic, and modelling research tied to contemporary climate change",
+      "Economics, policy, governance, health, communication, psychology, sociology, ethics, sustainability, and development in the climate-change context",
+      "Interdisciplinary natural- and social-science climate research"
+    ],
+    "official_exclusions_or_boundaries": [
+      "Palaeoclimate research that does not provide significant new insight into current climate change"
+    ],
+    "source_refs": [
+      "aims_scope"
+    ]
+  },
+  "content_types": {
+    "capture_completeness": "full",
+    "absence_is_not_exclusion": false,
+    "primary_research": [
+      "Article",
+      "Analysis",
+      "Brief Communication",
+      "Registered Report"
+    ],
+    "non_primary_or_commentary": [
+      "Correspondence",
+      "Review",
+      "Perspective",
+      "Progress",
+      "Comment",
+      "Matters Arising",
+      "News & Views",
+      "Book & Arts Review",
+      "Feature"
+    ],
+    "official_excerpts": [
+      {
+        "source_ref": "content_types",
+        "text": "Article, Analysis, Brief Communication, Registered Report, Correspondence, Review, Perspective, Progress, Comment, Matters Arising, News and Views, Book & Arts Review, Feature"
+      }
+    ],
+    "submission_notes": [
+      "Article is a substantial novel research study; Analysis is a new or comparative analysis producing broad, arresting conclusions; Brief Communication is a concise high-quality study; Registered Report evaluates the importance of the question and rigour of methods before results are known.",
+      "Unsolicited Review, Perspective, and Progress proposals require a one-to-two-page synopsis through the submission system.",
+      "The marked non-primary types should not report previously unpublished primary findings and may contain only minimal new supporting data."
+    ],
+    "source_refs": [
+      "content_types",
+      "registered_report_editorial"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "aims_scope",
+      "source_type": "official_aims_scope",
+      "url": "https://www.nature.com/nclimate/aims",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    },
+    {
+      "source_id": "content_types",
+      "source_type": "official_content_types",
+      "url": "https://www.nature.com/nclimate/content",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    },
+    {
+      "source_id": "registered_report_editorial",
+      "source_type": "official_editorial_content_type_clarification",
+      "url": "https://www.nature.com/articles/s41558-024-01932-4",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    }
+  ]
+}

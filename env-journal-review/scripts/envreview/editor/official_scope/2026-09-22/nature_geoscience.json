@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "journal_id": "nature_geoscience",
+  "display_name": "Nature Geoscience",
+  "retrieved_at": "2026-09-22",
+  "scope": {
+    "text_mode": "source-grounded concise normalization",
+    "text": "Nature Geoscience brings together top-quality, significant research across the full spectrum of Earth sciences and relevant related areas. It covers field observations, modelling, and theoretical studies, including investigations of the solid Earth, atmosphere, climate, oceans, hydrology, biogeochemistry, geobiology, geophysics, remote sensing, cryosphere, and planetary science. Work should be of general interest to the geoscience community rather than only a narrow local application.",
+    "text_sha256": "175b4d13622d80b1d2cceadd470848e11f149a510d17b0b503bd5b33ac5eb2cc",
+    "official_excerpts": [
+      {
+        "source_ref": "aims_scope",
+        "text": "a monthly multi-disciplinary journal aimed at bringing together top-quality research across the entire spectrum of the Earth Sciences"
+      }
+    ],
+    "inclusions": [
+      "Atmospheric, climate, cryosphere, hydrology, limnology, and ocean research",
+      "Biogeochemistry, geobiology, geochemistry, geology, geomorphology, geophysics, mineralogy, petrology, tectonics, and volcanology",
+      "Geoinformatics and remote sensing",
+      "Palaeontology, palaeoclimate, and palaeoceanography",
+      "Planetary science and space physics",
+      "Field, modelling, and theoretical studies"
+    ],
+    "official_exclusions_or_boundaries": [],
+    "source_refs": [
+      "aims_scope"
+    ]
+  },
+  "content_types": {
+    "capture_completeness": "full",
+    "absence_is_not_exclusion": false,
+    "primary_research": [
+      "Article",
+      "Brief Communication",
+      "Analysis"
+    ],
+    "non_primary_or_commentary": [
+      "Correspondence",
+      "Review",
+      "Perspective",
+      "Comment",
+      "Matters Arising",
+      "News & Views",
+      "Book Review",
+      "All Minerals Considered"
+    ],
+    "official_excerpts": [
+      {
+        "source_ref": "content_types",
+        "text": "Article, Brief Communication, Analysis, Correspondence, Review, Perspective, Comment, Matters Arising, News and Views, Book Review, All Minerals Considered"
+      }
+    ],
+    "submission_notes": [
+      "Article is a substantial novel study of high quality and general interest to the geoscience community.",
+      "Brief Communication is a concise study of high quality and broad geoscience interest; Analysis examines existing or comparative data or meta-analysis and reaches novel conclusions of broad interest.",
+      "The marked non-primary types should not report previously unpublished primary findings and may contain only minimal new supporting data."
+    ],
+    "source_refs": [
+      "content_types"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "aims_scope",
+      "source_type": "official_aims_scope",
+      "url": "https://www.nature.com/ngeo/aims",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    },
+    {
+      "source_id": "content_types",
+      "source_type": "official_content_types",
+      "url": "https://www.nature.com/ngeo/content",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    }
+  ]
+}

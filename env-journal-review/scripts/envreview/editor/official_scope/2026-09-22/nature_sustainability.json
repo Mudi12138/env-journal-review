@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "journal_id": "nature_sustainability",
+  "display_name": "Nature Sustainability",
+  "retrieved_at": "2026-09-22",
+  "scope": {
+    "text_mode": "source-grounded concise normalization",
+    "text": "Nature Sustainability publishes significant sustainability research from the natural and social sciences, engineering, and policy. Its remit includes sustainability, its policy dimensions and possible solutions, and work that improves understanding of Earth, social, and technological systems and their interfaces. Humanities contributions can fit when they deepen understanding of sustainable development, its values and moral implications, or transformations in practices and institutions for present and future human and environmental wellbeing.",
+    "text_sha256": "318d37985d4a200da78493ca90ce269c3629f80e6465dec5aa243712e5d49075",
+    "official_excerpts": [
+      {
+        "source_ref": "journal_information",
+        "text": "publishing the best research about sustainability from the natural and social sciences, as well as from the fields of engineering and policy."
+      },
+      {
+        "source_ref": "scope_editorial",
+        "text": "research contributing to a better understanding of the Earth, social and technological systems and their interfaces."
+      }
+    ],
+    "inclusions": [
+      "Natural-science, social-science, engineering, and policy research on sustainability",
+      "Earth, social, and technological systems and their interfaces",
+      "Policy dimensions and solutions for sustainability",
+      "Humanities contributions that illuminate sustainable development, values, institutions, or practice transformations"
+    ],
+    "official_exclusions_or_boundaries": [],
+    "source_refs": [
+      "journal_information",
+      "scope_editorial"
+    ]
+  },
+  "content_types": {
+    "capture_completeness": "full",
+    "absence_is_not_exclusion": false,
+    "primary_research": [
+      "Article",
+      "Analysis",
+      "Resource",
+      "Brief Communication"
+    ],
+    "non_primary_or_commentary": [
+      "Correspondence",
+      "Review",
+      "Perspective",
+      "Comment",
+      "Matters Arising",
+      "News & Views",
+      "Book Review",
+      "Feature",
+      "Policy Brief"
+    ],
+    "official_excerpts": [
+      {
+        "source_ref": "content_types",
+        "text": "Article, Analysis, Resource, Brief Communication, Correspondence, Review, Perspective, Comment, Matters Arising, News & Views, Book Review, Feature, Policy Brief"
+      }
+    ],
+    "submission_notes": [
+      "Article is a substantial novel research study; Analysis uses existing or comparative data to reach novel conclusions of broad importance; Resource presents a large data set of broad utility and significance; Brief Communication is a concise study of high quality and broad interest.",
+      "Unsolicited Review and Perspective proposals require a one-to-two-page synopsis through the submission system.",
+      "Systematic, replicable extraction and analysis of literature is treated as original research and should use Article or Analysis rather than Review."
+    ],
+    "source_refs": [
+      "content_types"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "journal_information",
+      "source_type": "official_journal_information",
+      "url": "https://www.nature.com/natsustain/journal-information",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    },
+    {
+      "source_id": "scope_editorial",
+      "source_type": "official_editorial_scope_statement",
+      "url": "https://www.nature.com/articles/s41893-018-0032-1",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    },
+    {
+      "source_id": "content_types",
+      "source_type": "official_content_types",
+      "url": "https://www.nature.com/natsustain/content",
+      "publisher_domain": "nature.com",
+      "retrieved_at": "2026-09-22"
+    }
+  ]
+}

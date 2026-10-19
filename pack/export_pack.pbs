@@ -1,0 +1,14 @@
+#!/bin/bash
+#PBS -N envreview_pack
+#PBS -l select=1:ncpus=4:mem=24gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+#PBS -o /srv/scratch/$USER/envtop/pack/export_pack.log
+
+# CPU only: copies the retrieval index, computes topic centroids and compresses ~40k
+# full texts into one SQLite file, then tars the pack.
+set -e
+mkdir -p /srv/scratch/$USER/envtop/pack
+cd /srv/scratch/$USER/envtop/pack
+/srv/scratch/$USER/my_env1/bin/python export_pack.py --version v1
+ls -la /srv/scratch/$USER/envtop/pack /srv/scratch/$USER/envtop/pack/env-journal-index-v1

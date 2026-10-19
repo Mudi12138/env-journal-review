@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "journal_id": "one_earth",
+  "display_name": "One Earth",
+  "retrieved_at": "2026-09-22",
+  "scope": {
+    "text_mode": "source-grounded concise normalization",
+    "text": "One Earth is Cell Press's flagship sustainability journal for research and perspectives that significantly advance understanding of, or responses to, major sustainability challenges. It seeks to bridge natural, social, and applied sciences and the humanities, particularly welcomes cross-disciplinary interest, and considers work across spatial, temporal, and socio-political scales. Disciplinary studies can fit, but every submission must offer a significant conceptual advance.",
+    "text_sha256": "603a234c7d7b59bf80f0776f7ede608660fe121407c84c66036b2dcaf7a3213d",
+    "official_excerpts": [
+      {
+        "source_ref": "official_description",
+        "text": "Studies conducted at all spatial, temporal, and socio-political scales will be considered, but all submissions must offer a significant conceptual advance."
+      }
+    ],
+    "inclusions": [
+      "Biodiversity and ecosystem services",
+      "Climate dynamics, adaptation, and mitigation",
+      "Engineering and innovation for sustainability",
+      "Environmental pollution and novel entities",
+      "Food, water, energy, cities, production, consumption, and waste systems",
+      "Governance, policy, international relations, finance, economics, behaviour, psychology, health, wellbeing, and environmental justice",
+      "Land-use, ocean, coastal, and equitable-development research"
+    ],
+    "official_exclusions_or_boundaries": [
+      "Submissions without a significant conceptual advance"
+    ],
+    "source_refs": [
+      "official_description"
+    ]
+  },
+  "content_types": {
+    "capture_completeness": "partial",
+    "absence_is_not_exclusion": true,
+    "primary_research": [
+      "Research Article"
+    ],
+    "non_primary_or_commentary": [
+      "Perspective"
+    ],
+    "official_excerpts": [
+      {
+        "source_ref": "presubmission_inquiry",
+        "text": "One Earth is the home for high-quality research and perspectives that seek to understand and address today’s sustainability challenges."
+      }
+    ],
+    "submission_notes": [
+      "The official journal description explicitly identifies top-tier original research and perspectives; additional article-type constraints must be read from the official article-types page before a production genre gate is enabled.",
+      "The journal offers a presubmission inquiry route that asks for context, rationale, significance, implications, and societal relevance."
+    ],
+    "source_refs": [
+      "official_description",
+      "article_types",
+      "presubmission_inquiry"
+    ],
+    "capture_status": "Conservative subset only: the official article-types endpoint was identified but its detailed page was not fully retrievable in this capture."
+  },
+  "sources": [
+    {
+      "source_id": "official_description",
+      "source_type": "official_publisher_journal_description",
+      "url": "https://shop.elsevier.com/journals/one-earth/2590-3322",
+      "publisher_domain": "shop.elsevier.com",
+      "retrieved_at": "2026-09-22"
+    },
+    {
+      "source_id": "article_types",
+      "source_type": "official_content_types_endpoint",
+      "url": "https://www.cell.com/one-earth/article-types",
+      "publisher_domain": "cell.com",
+      "retrieved_at": "2026-09-22",
+      "capture_note": "Endpoint identified from the official presubmission page; detailed response was access-restricted during capture."
+    },
+    {
+      "source_id": "presubmission_inquiry",
+      "source_type": "official_presubmission_guidance",
+      "url": "https://info.cell.com/one-earth-pre-submission",
+      "publisher_domain": "info.cell.com",
+      "retrieved_at": "2026-09-22"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "effective_date": "2026-09-22",
+  "source_policy": "Only official publisher or official journal sources are admitted. Scope and content-type snapshots are versioned and are not fetched live during an editorial decision.",
+  "tier_registry": "tier_bars.json",
+  "scope_snapshot_root": "official_scope/2026-09-22",
+  "journals": [
+    {
+      "journal_id": "nature_water",
+      "display_name": "Nature Water",
+      "publisher": "Springer Nature",
+      "issn": "2731-6084",
+      "tier_id": "T3",
+      "snapshot": "official_scope/2026-09-22/nature_water.json"
+    },
+    {
+      "journal_id": "nature_sustainability",
+      "display_name": "Nature Sustainability",
+      "publisher": "Springer Nature",
+      "issn": "2398-9629",
+      "tier_id": "T3",
+      "snapshot": "official_scope/2026-09-22/nature_sustainability.json"
+    },
+    {
+      "journal_id": "nature_climate_change",
+      "display_name": "Nature Climate Change",
+      "publisher": "Springer Nature",
+      "issn": "1758-6798",
+      "tier_id": "T3",
+      "snapshot": "official_scope/2026-09-22/nature_climate_change.json"
+    },
+    {
+      "journal_id": "nature_geoscience",
+      "display_name": "Nature Geoscience",
+      "publisher": "Springer Nature",
+      "issn": "1752-0908",
+      "tier_id": "T3",
+      "snapshot": "official_scope/2026-09-22/nature_geoscience.json"
+    },
+    {
+      "journal_id": "one_earth",
+      "display_name": "One Earth",
+      "publisher": "Cell Press / Elsevier",
+      "issn": "2590-3322",
+      "tier_id": "T3",
+      "snapshot": "official_scope/2026-09-22/one_earth.json"
+    },
+    {
+      "journal_id": "environmental_science_technology",
+      "display_name": "Environmental Science & Technology",
+      "publisher": "American Chemical Society",
+      "issn": "1520-5851",
+      "tier_id": "T2",
+      "snapshot": "official_scope/2026-09-22/environmental_science_technology.json"
+    },
+    {
+      "journal_id": "water_research",
+      "display_name": "Water Research",
+      "publisher": "Elsevier / International Water Association",
+      "issn": "0043-1354",
+      "tier_id": "T1",
+      "snapshot": "official_scope/2026-09-22/water_research.json"
+    }
+  ]
+}

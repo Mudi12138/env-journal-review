@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "journal_id": "water_research",
+  "display_name": "Water Research",
+  "retrieved_at": "2026-09-22",
+  "scope": {
+    "text_mode": "source-grounded concise normalization",
+    "text": "Water Research publishes original research on the science and technology of the anthropogenic water cycle, water quality, and water management worldwide. Its applied interdisciplinary remit covers treatment and recovery, urban hydrology, drinking water, reuse, sanitation and public health, contaminants and water quality, anthropogenic impacts and restoration, water interfaces, water-related modelling and machine learning, and socio-economic, policy, and regulatory studies. Work centred on a supporting discipline can be rejected upfront when it does not make a strong connection to water research.",
+    "text_sha256": "1254eccd7493ba8f3ceb7ac6b8952c28ea557b68616f086056d7c0dc68417cae",
+    "official_excerpts": [
+      {
+        "source_ref": "official_description",
+        "text": "all aspects of the science and technology of the anthropogenic water cycle, water quality, and its management worldwide."
+      }
+    ],
+    "inclusions": [
+      "Water and wastewater treatment, resource recovery, and residual management",
+      "Urban hydrology, sewer systems, stormwater, and green infrastructure",
+      "Drinking water, distribution, reuse, sanitation, public health, and risk assessment",
+      "Water contaminants, sensing, monitoring, fate, assessment, and anthropogenic impacts",
+      "Restoration and remediation linked to surface water or groundwater",
+      "Water-sediment and water-atmosphere interfaces under anthropogenic influence",
+      "Mathematical modelling, systems analysis, machine learning, and beneficial big-data use related to the anthropogenic water cycle",
+      "Water-related socio-economic, policy, and regulation research"
+    ],
+    "official_exclusions_or_boundaries": [
+      "Work that goes deeply into chemistry, toxicology, microbiology, materials science, or another supporting discipline without a good link to water research"
+    ],
+    "source_refs": [
+      "official_description"
+    ]
+  },
+  "content_types": {
+    "capture_completeness": "partial",
+    "absence_is_not_exclusion": true,
+    "primary_research": [
+      "Original research paper"
+    ],
+    "non_primary_or_commentary": [],
+    "official_excerpts": [
+      {
+        "source_ref": "official_description",
+        "text": "Water Research publishes refereed, original research papers"
+      }
+    ],
+    "submission_notes": [
+      "The official journal description directly verifies refereed original research papers.",
+      "No additional genre is enabled in this registry until its current rule is captured from the journal-specific official Guide for Authors."
+    ],
+    "source_refs": [
+      "official_description",
+      "guide_for_authors"
+    ],
+    "capture_status": "Conservative subset only: the official journal-specific Guide for Authors endpoint was access-restricted during capture."
+  },
+  "sources": [
+    {
+      "source_id": "official_description",
+      "source_type": "official_publisher_journal_description",
+      "url": "https://shop.elsevier.com/journals/water-research/0043-1354",
+      "publisher_domain": "shop.elsevier.com",
+      "retrieved_at": "2026-09-22"
+    },
+    {
+      "source_id": "guide_for_authors",
+      "source_type": "official_guide_for_authors_endpoint",
+      "url": "https://www.sciencedirect.com/journal/water-research/publish/guide-for-authors",
+      "publisher_domain": "sciencedirect.com",
+      "retrieved_at": "2026-09-22",
+      "capture_note": "Endpoint identified from the official journal page; detailed response was access-restricted during capture."
+    }
+  ]
+}

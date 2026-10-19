@@ -1,0 +1,148 @@
+{
+  "schema_version": "2.0",
+  "effective_date": "2026-10-15",
+  "purpose": "Two orthogonal post-novelty bars per tier: significance (is the contribution central and meaningful to the journal's core concern) and novelty_magnitude (is the increment's magnitude sufficient for the tier). Neither axis may re-litigate scope, genre, or contribution type; methods and informatics are a first-class contribution path in the significance axis.",
+  "order_high_to_low": [
+    "T3",
+    "T2",
+    "T1"
+  ],
+  "decision_rules": {
+    "apply_after": [
+      "scope_fit",
+      "genre_fit",
+      "novelty_increment"
+    ],
+    "do_not_use_for": [
+      "scope_fit",
+      "genre_fit",
+      "profile_statistics",
+      "citation_prediction"
+    ],
+    "comparison_basis": "Compare the manuscript's named increment with the closest global precedents of the same research genre or article type.",
+    "no_compensation": "High expected attention or citation potential cannot compensate for a missing or insufficient novelty increment.",
+    "axis_notes": {
+      "significance": "Judges centrality and meaningfulness of the contribution to the journal's core concern (environmental for ES&T, water for WR, broader field for Nature sub-journals). Contribution TYPE is not the criterion: a methods, computational or informatics contribution is first-class when it enables previously-unobtainable results or a meaningful advance in understanding, predicting, managing or operating the relevant system.",
+      "novelty_magnitude": "Judges only the magnitude of the already-identified increment against the tier. It must not re-litigate the contribution's type or relevance."
+    }
+  },
+  "tiers": {
+    "T3": {
+      "rank": 3,
+      "label": "综合旗舰/子刊等价类",
+      "member_journals": [
+        "nature_water",
+        "nature_sustainability",
+        "nature_climate_change",
+        "nature_geoscience",
+        "one_earth"
+      ],
+      "significance": {
+        "core_concern": "broader field-level relevance beyond a narrow specialist topic",
+        "bar": "The main conclusions must matter beyond a narrow specialist subfield. The contribution should advance understanding, reframe a problem, or carry implications that influence the broader field, sustainability science, or climate research; the field-level relevance must be central to the study, not asserted only in motivation or conclusion.",
+        "pass_signals": [
+          "The contribution's main conclusion is a material advance in understanding that matters beyond a narrow specialty",
+          "The work reframes an important problem or connects disciplines in a way that changes conclusions or action",
+          "A technical, computational or AI contribution whose insight enables a meaningful new field-level conclusion"
+        ],
+        "block_signals": [
+          "A specialist technical result whose broader relevance is only asserted in the introduction or conclusion (decorative)",
+          "A method or AI advance whose field-level implication is only a secondary demonstration",
+          "Relevance confined to one narrow specialty, region, dataset, material, or method"
+        ]
+      },
+      "novelty_magnitude": {
+        "bar": "The increment must be substantial or conceptual rather than incremental: a material advance in understanding, a reframe of an important problem, or a consequential cross-subfield, technological, practice or policy consequence that justifies visibility above a leading specialist journal.",
+        "usually_insufficient": [
+          "A routine specialist advance with limited consequences outside a narrow task",
+          "A single-site or single-dataset performance gain without a broader conceptual or practical consequence",
+          "A method transfer whose main contribution is applying an established approach in a new setting"
+        ],
+        "possible_sufficiency_signals": [
+          "Changes fundamental understanding or reframes the research problem",
+          "Removes a recognized barrier of broad importance",
+          "Connects disciplines in a way that changes conclusions or action",
+          "Supports a consequential change in technology, practice, governance, or policy"
+        ],
+        "notes": [
+          "For perspectives, analyses and reviews (policy_or_social, synthesis_or_review), judge the consequence of the argument and how well it is substantiated, not the scale of new data; whether the journal publishes such articles is genre_fit's question."
+        ]
+      }
+    },
+    "T2": {
+      "rank": 2,
+      "label": "ES&T类",
+      "member_journals": [
+        "environmental_science_technology"
+      ],
+      "significance": {
+        "core_concern": "environmental significance central to the study",
+        "bar": "Environmental relevance must be central and explicit, not assumed merely because a compound, material, process or dataset is involved. A methods, computational or informatics contribution is significant when it enables environmental results or understanding that were previously unobtainable, or advances the measurement, modeling, design, evaluation, or management of an environmental system.",
+        "pass_signals": [
+          "The main contribution changes how researchers understand an environmental process, approach an environmental problem, measure or model a contaminant, design or evaluate a technology, or support environmental decision-making",
+          "A methods or informatics advance that enables previously-unobtainable environmental results or a meaningful environmental insight"
+        ],
+        "block_signals": [
+          "Environmental relevance assumed merely because an environmental compound or dataset is involved",
+          "A method or AI contribution whose environmental application is only a secondary demonstration",
+          "The core contribution is disciplinary (chemistry, materials, AI) with environmental significance added only in motivation or conclusion"
+        ]
+      },
+      "novelty_magnitude": {
+        "bar": "The increment should go beyond incremental progress: a significant and generalizable advance, not merely a new dataset, site, material, operating condition, or a small performance increase. It should provide new understanding, consequence, or transferable technological insight beyond a routine case.",
+        "usually_insufficient": [
+          "Changing only a dataset, site, material, or operating condition, with no new understanding or insight that the authors show could carry beyond that case",
+          "A small performance increase without new environmental understanding",
+          "A laboratory demonstration lacking environmentally realistic evidence or transferable insight"
+        ],
+        "possible_sufficiency_signals": [
+          "Provides important new insight into an environmental process or mechanism",
+          "Demonstrates an environmentally relevant and generalizable technology advance",
+          "Produces conclusions transferable beyond the immediate site, sample, or case",
+          "A single-system or single-dataset study whose insight is new and whose conditions for transfer are argued: single-system scope is a limitation to weigh, not by itself a shortfall"
+        ],
+        "notes": [
+          "For perspectives, analyses and reviews (policy_or_social, synthesis_or_review), judge the consequence of the argument and how well it is substantiated, not the scale of new data; whether the journal publishes such articles is genre_fit's question.",
+          "Methods, computational and informatics increments are judged by the capability or insight they establish. Demonstrated environmental outcomes (for example realised emission reductions or field deployment) strengthen the case, but their absence is not by itself a magnitude shortfall when the capability is substantial and validated; a small accuracy gain on the authors' own benchmark remains insufficient."
+        ]
+      }
+    },
+    "T1": {
+      "rank": 1,
+      "label": "WR类",
+      "member_journals": [
+        "water_research"
+      ],
+      "significance": {
+        "core_concern": "water significance central to the study",
+        "bar": "The paper must be fundamentally a water-research contribution: the main scientific question and conclusions must matter to the water research community. Supporting disciplines (chemistry, materials, microbiology, toxicology, machine learning/AI) fit when they produce a meaningful advance in understanding, predicting, managing, or operating a water system; the water-system implication must be central, not a secondary demonstration.",
+        "pass_signals": [
+          "The central research question is genuinely a water-research question and the conclusions matter to the water community",
+          "A supporting-discipline (including ML/AI) contribution that produces a meaningful advance in understanding, predicting, managing, or operating a water system"
+        ],
+        "block_signals": [
+          "The water application is only a secondary demonstration of a new material, algorithm, or mechanism",
+          "A new model whose main value is better predictive metrics without a water-system advance",
+          "The work goes deeply into a supporting discipline without establishing a strong connection to water research"
+        ]
+      },
+      "novelty_magnitude": {
+        "bar": "The contribution should be original and substantial for WR: credible, clear, useful water-domain knowledge. A strong specialist or applied advance (including a single-system study) can suffice when it produces genuine water-domain knowledge and explains transferability or limits of application.",
+        "usually_insufficient": [
+          "Work in a supporting discipline with only a superficial link to water research",
+          "Applying an established model or method without new water-domain knowledge",
+          "A local case with no explanation of transferability, mechanism, or applicability limits"
+        ],
+        "possible_sufficiency_signals": [
+          "Adds a defensible water-science or water-engineering insight",
+          "Improves practice while establishing why and where the result should transfer",
+          "Clarifies a mechanism, control strategy, or applicability boundary relevant to the anthropogenic water cycle"
+        ],
+        "notes": [
+          "For perspectives, analyses and reviews (policy_or_social, synthesis_or_review), judge the consequence of the argument and how well it is substantiated, not the scale of new data; whether the journal publishes such articles is genre_fit's question."
+        ]
+      }
+    }
+  },
+  "revision_note": "2026-10-15 calibration after the 5-manuscript test (all published, rejected at their own journals mainly on novelty_magnitude): T2 single-system wording softened without changing the bar; methods/informatics magnitude judged by the capability established; perspectives judged by the consequence of the argument. 2026-09-22 version: git history."
+}

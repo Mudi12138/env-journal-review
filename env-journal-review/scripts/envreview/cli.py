@@ -1,0 +1,462 @@
+"""envreview — the command-line half of the env-journal-review skill.
+
+The agent (Claude, Codex, …) does the reading and writing; these commands do everything
+mechanical: parse the manuscript, pick the reviewers, search the local index, fetch full texts,
+build and check the editor's evidence, and assemble the report. Every command reads and writes
+files in one run directory, so any step can be repeated.
+
+  envreview start --input paper.pdf --journal "ES&T" --tag mypaper
+  envreview editor-pack    --run DIR --query "..." --query "..." --phrase "..."
+  envreview editor-prompt  --run DIR [--journal ID]      -> agent writes editor/<ID>/assessment.json
+  envreview editor-decide  --run DIR [--journal ID]
+  envreview reviewer-brief --run DIR --seat R1           -> agent writes seats/R1/queries.json
+  envreview search         --run DIR --seat R1           -> agent writes seats/R1/screening.json
+  envreview fulltext       --run DIR --seat R1           -> agent writes seats/R1/report.md
+  envreview check          --run DIR --seat R1
+  envreview letter-brief   --run DIR                     -> agent writes decision_letter.md
+  envreview profile-brief  --run DIR                     -> agent writes profile_note.md
+  envreview report         --run DIR
+  envreview index-info [--verify]
+
+Output is JSON on stdout unless a command prints instructions for the agent.
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import re
+import sys
+from datetime import date, datetime, timezone
+from pathlib import Path
+
+from . import common as C
+from . import manuscript as M
+from . import reviewer_prompts as RP
+
+SEATS = ["R1", "R2", "R3"]
+N_SCREEN, N_FULL, MAX_CHARS = 20, 5, 60000
+DOI_RE = re.compile(r"10\.\d{4,9}/[^\s`\"'<>()\[\]*]+")
+DECISION_EN = {"送审": "send out for review", "拒稿": "reject", "校验失败": "validation failed"}
+RECS = ["reject and resubmit", "minor revision", "major revision", "acceptance", "rejection",
+        "accept", "reject"]
+
+_INDEX = None
+
+
+def index():
+    global _INDEX
+    if _INDEX is None:
+        root = C.index_dir()
+        if not (root / "manifest.json").exists():
+            sys.exit(f"Index pack not found at {root}. Download {C.INDEX_NAME} and unpack it there, "
+                     "or set ENVREVIEW_INDEX to its folder (see the skill's README).")
+        from .index import LocalIndex
+        _INDEX = LocalIndex(root)
+    return _INDEX
+
+
+def editor_mod():
+    if str(C.EDITOR) not in sys.path:
+        sys.path.insert(0, str(C.EDITOR))
+    import editor_v3  # noqa: E402
+    return editor_v3
+
+
+def out(obj) -> None:
+    print(json.dumps(obj, ensure_ascii=False, indent=1))
+
+
+def say(text: str) -> None:
+    print(text.strip() + "\n")
+
+
+# ---------------------------------------------------------------------------------- start
+
+def cmd_start(a):
+    run = C.Run(Path(a.out) if a.out else Path.cwd() / "envreview_runs" / a.tag)
+    ms = M.load(Path(a.input), a.title,
+                Path(a.abstract_file).read_text(encoding="utf-8") if a.abstract_file else None)
+    jid = C.resolve_journal(a.journal)
+    run.path("manuscript.txt").write_text(ms["text"], encoding="utf-8")
+    picked = index().roles(ms["title"], ms["abstract"], exclude=a.exclude)
+    if a.topics:
+        tx = C.taxonomy()
+        picked["roles"] = [{"code": c, "label": tx[c]["label"], "sim": None}
+                           for c in a.topics.split(",")]
+    state = {"tag": a.tag, "created": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+             "source": ms["source"], "title": ms["title"], "abstract": ms["abstract"],
+             "chars": ms["chars"], "journal_id": jid,
+             "journal": C.journals()[jid]["display_name"],
+             "before": a.before or date.today().year, "exclude": a.exclude, **picked,
+             "seats": {s: {} for s in SEATS}, "editor": {}}
+    run.save(state)
+    out({k: state[k] for k in ("title", "journal", "before", "roles", "methods")}
+        | {"run": str(run.dir), "abstract_preview": state["abstract"][:400]})
+    say(f"""
+Run directory: {run.dir}
+Check that the title and abstract above are right (rerun with --title / --abstract-file if not).
+Next: the editor stage (editor-pack) and the three reviewers (reviewer-brief --seat R1..R3).""")
+
+
+# ---------------------------------------------------------------------------------- editor
+
+def cmd_editor_pack(a):
+    run = C.Run(Path(a.run))
+    st = run.state
+    if a.query:
+        run.write_json("editor/queries.json", {"queries": a.query, "phrases": a.phrase or []})
+    q = run.read_json("editor/queries.json")
+    wide = index().search(q["queries"], q.get("phrases", []), before=st["before"],
+                          exclude=st["exclude"], topk=100, per_path=300)
+    dist = {}
+    for h in wide:
+        dist[h["journal"]] = dist.get(h["journal"], 0) + 1
+    pack = {"id": st["tag"], "title": st["title"], "abstract": st["abstract"],
+            "fulltext": run.path("manuscript.txt").read_text(encoding="utf-8"),
+            "cutoff_year": st["before"], "excluded_self": st["exclude"],
+            "queries": q["queries"], "phrases": q.get("phrases", []),
+            "journal_distribution_top100": dist, "hits": wide[:20]}
+    run.write_json("editor/pack.json", pack)
+    out({"pack": str(run.path("editor/pack.json")), "hits": len(pack["hits"]),
+         "top_hits": [f"{h['year']} {h['journal']}: {h['title'][:90]}" for h in pack["hits"][:8]]})
+
+
+def _editor_inputs(run, jid):
+    E = editor_mod()
+    registry = E.load_journal_registry(C.EDITOR / "journal_registry.json")
+    tiers = E.load_tier_bars(C.EDITOR / "tier_bars.json")
+    E.validate_journal_tier_membership(registry, tiers, C.EDITOR / "tier_bars.json")
+    journal = registry[jid]
+    return E, run.read_json("editor/pack.json"), journal, tiers[journal["tier_id"]]
+
+
+def cmd_editor_prompt(a):
+    run = C.Run(Path(a.run))
+    jid = C.resolve_journal(a.journal) if a.journal else run.state["journal_id"]
+    E, pack, journal, tier = _editor_inputs(run, jid)
+    messages, meta = E.build_decision_messages(pack, journal, tier)
+    d = f"editor/{jid}"
+    run.path(f"{d}/system.md").write_text(messages[0]["content"], encoding="utf-8")
+    run.path(f"{d}/user.md").write_text(messages[1]["content"], encoding="utf-8")
+    run.write_json(f"{d}/schema.json", E.ASSESSMENT_SCHEMA["schema"])
+    run.write_json(f"{d}/meta.json", meta)
+    say(f"""
+EDITOR TASK — {journal['display_name']} ({journal['tier_id']})
+Read {run.path(d, 'system.md')} as your instructions and {run.path(d, 'user.md')} as the material.
+Write ONE JSON object, valid against {run.path(d, 'schema.json')}, to {run.path(d, 'assessment.json')}.
+You give evidence on five axes only; the decision is derived by the next command. Then run:
+  envreview editor-decide --run "{run.dir}" --journal {jid}""")
+
+
+def cmd_editor_decide(a):
+    run = C.Run(Path(a.run))
+    jid = C.resolve_journal(a.journal) if a.journal else run.state["journal_id"]
+    E, pack, journal, tier = _editor_inputs(run, jid)
+    d = f"editor/{jid}"
+    try:
+        assessment = run.read_json(f"{d}/assessment.json")
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        sys.exit(f"cannot read {d}/assessment.json: {exc}")
+    import jsonschema
+    try:
+        jsonschema.validate(assessment, E.ASSESSMENT_SCHEMA["schema"])
+        E.validate_assessment(assessment, pack, journal, tier)
+        decision = E.derive_decision(assessment)
+    except (jsonschema.ValidationError, ValueError) as exc:
+        msg = getattr(exc, "message", None) or str(exc)
+        print(json.dumps({"valid": False, "errors": msg}, ensure_ascii=False, indent=1))
+        say("Fix assessment.json so that it meets these rules (quotes must be copied verbatim), "
+            "then run editor-decide again.")
+        sys.exit(2)
+    decision["decision_en"] = DECISION_EN.get(decision["decision"], decision["decision"])
+    run.write_json(f"{d}/decision.json", decision)
+    st = run.state
+    st["editor"][jid] = {"decision": decision["decision_en"],
+                         "blocking_axes": decision.get("blocking_axes", []),
+                         "verdicts": {ax: assessment[ax]["verdict"] for ax in assessment}}
+    run.save(st)
+    out({"journal": journal["display_name"], **st["editor"][jid]})
+
+
+# ---------------------------------------------------------------------------------- reviewers
+
+def role_text(st, seat):
+    tx = C.taxonomy()
+    codes = [r["code"] for r in st["roles"]]
+    me = codes[SEATS.index(seat)]
+    others = [f"{c} {tx[c]['label']}" for c in codes if c != me]
+    covers = tx[me]["covers"][0].lower() + tx[me]["covers"][1:]
+    return RP.ROLE.format(label=tx[me]["label"], covers=covers,
+                          methods="; ".join(st["methods"]) or "the methods described in it",
+                          other_1=others[0], other_2=others[1])
+
+
+def cmd_reviewer_brief(a):
+    run = C.Run(Path(a.run))
+    st = run.state
+    d = f"seats/{a.seat}"
+    say(f"""
+REVIEWER {a.seat} — step 1 of 3: search queries
+{RP.QUERY_SYS.format(journal=st['journal'], role=role_text(st, a.seat))}
+
+The manuscript is {run.path('manuscript.txt')}.
+Write {{"queries": [...], "phrases": [...]}} to {run.path(d, 'queries.json')}, then run:
+  envreview search --run "{run.dir}" --seat {a.seat}""")
+
+
+def _cands_block(cands, screen=None):
+    marks = {p["doi"].lower(): p for p in (screen or {}).get("papers", [])}
+    full = {x.lower() for x in (screen or {}).get("read_in_full", [])}
+    rows = []
+    for i, c in enumerate(cands, 1):
+        m = marks.get(c["doi"].lower())
+        head = f"[{i}] DOI {c['doi']} | {c['year']} | {c['journal']}"
+        if m:
+            head += f" | your label: {m['label']}" + (" | read in full" if c["doi"].lower() in full else "")
+        body = f"TITLE: {c['title']}\nABSTRACT: {c['abstract'] or '(no abstract)'}"
+        if m:
+            body += f"\nYOUR NOTE: {m['note']}"
+        rows.append(f"{head}\n{body}")
+    return "\n\n".join(rows)
+
+
+def cmd_search(a):
+    run = C.Run(Path(a.run))
+    st = run.state
+    d = f"seats/{a.seat}"
+    q = run.read_json(f"{d}/queries.json")
+    ranked = index().search(q["queries"], q.get("phrases", []), before=st["before"],
+                            exclude=st["exclude"], topk=60, per_path=300)
+    cands = [h for h in ranked if h["has_fulltext"]][:N_SCREEN]
+    run.write_json(f"{d}/candidates.json", cands)
+    run.path(d, "candidates.md").write_text(_cands_block(cands), encoding="utf-8")
+    run.write_json(f"{d}/screening.schema.json", RP.SCREEN_SCHEMA["schema"])
+    say(f"""
+REVIEWER {a.seat} — step 2 of 3: screen {len(cands)} abstracts
+{RP.SCREEN_SYS.format(journal=st['journal'], role=role_text(st, a.seat), n=len(cands), before=st['before'])}
+
+Manuscript: {run.path('manuscript.txt')}
+Titles and abstracts to screen: {run.path(d, 'candidates.md')}
+Write one JSON object valid against {run.path(d, 'screening.schema.json')} to
+{run.path(d, 'screening.json')}, then run:
+  envreview fulltext --run "{run.dir}" --seat {a.seat}""")
+
+
+def cmd_fulltext(a):
+    run = C.Run(Path(a.run))
+    st = run.state
+    d = f"seats/{a.seat}"
+    cands = run.read_json(f"{d}/candidates.json")
+    screen = run.read_json(f"{d}/screening.json")
+    import jsonschema
+    jsonschema.validate(screen, RP.SCREEN_SCHEMA["schema"])
+    known = {c["doi"].lower(): c["doi"] for c in cands}
+    chosen = list(dict.fromkeys(known[x.lower()] for x in screen["read_in_full"]
+                                if x.lower() in known))[:N_FULL]
+    screen["read_in_full"] = chosen
+    run.write_json(f"{d}/screening.json", screen)
+    texts = [t for t in index().fulltext(chosen, max_chars=MAX_CHARS) if t.get("found")]
+    run.path(d, "screening_table.md").write_text(
+        f"Truly similar: {screen['n_truly_similar']}. {screen['novelty_note']}\n\n"
+        + _cands_block(cands, screen), encoding="utf-8")
+    run.path(d, "fulltexts.md").write_text("\n\n".join(
+        f"---\n[{i + 1}] DOI {t['doi']} | {t['year']} | {t['journal']}\nTITLE: {t['title']}\n\n{t['text']}"
+        for i, t in enumerate(texts)) or "(none chosen)", encoding="utf-8")
+    qs = "\n".join(f"  - {x}" for x in run.read_json(f"{d}/queries.json")["queries"])
+    say(f"""
+REVIEWER {a.seat} — step 3 of 3: write the report
+{RP.REVIEW_SYS.format(journal=st['journal'], role=role_text(st, a.seat), n_screened=len(cands),
+                      n_full=len(texts), queries=qs, before=st['before'])}
+
+Manuscript: {run.path('manuscript.txt')}
+Your screening table: {run.path(d, 'screening_table.md')}
+The papers you read in full: {run.path(d, 'fulltexts.md')}
+Write the report (Markdown) to {run.path(d, 'report.md')}, then run:
+  envreview check --run "{run.dir}" --seat {a.seat}""")
+
+
+def recommendation(report):
+    para = report.strip().split("\n\n")[0].lower()
+    m = re.search(r"recommend\s+(?:a\s+|an\s+)?([a-z ]+?)[.\n]", para)
+    found = m.group(1) if m else para
+    for r in RECS:
+        if r in found:
+            return {"accept": "acceptance", "reject": "rejection"}.get(r, r)
+    return "?"
+
+
+def cmd_check(a):
+    run = C.Run(Path(a.run))
+    st = run.state
+    d = f"seats/{a.seat}"
+    report = run.path(d, "report.md").read_text(encoding="utf-8")
+    cands = {c["doi"].lower(): c["doi"] for c in run.read_json(f"{d}/candidates.json")}
+    full = {x.lower() for x in run.read_json(f"{d}/screening.json")["read_in_full"]}
+    found = sorted({x.rstrip(".,;:").lower() for x in DOI_RE.findall(report)})
+    res = {"recommendation": recommendation(report),
+           "cited": [cands[x] for x in found if x in cands],
+           "cited_abstract_only": [cands[x] for x in found if x in cands and x not in full],
+           "cited_outside_screening": [x for x in found if x not in cands],
+           "words": len(report.split())}
+    st["seats"][a.seat] = res
+    run.save(st)
+    out(res)
+    if res["cited_outside_screening"]:
+        say("WARNING: the report cites DOIs that were not in this reviewer's screening table. "
+            "Remove them or replace them with screened papers.")
+    if res["recommendation"] == "?":
+        say('WARNING: no recommendation found; the first paragraph must end "I therefore recommend X."')
+
+
+# ---------------------------------------------------------------------------------- editor letter
+
+def cmd_letter_brief(a):
+    run = C.Run(Path(a.run))
+    st = run.state
+    tx = C.taxonomy()
+    parts = []
+    for i, (s, r) in enumerate(zip(SEATS, st["roles"]), 1):
+        p = run.path("seats", s, "report.md")
+        if not p.exists():
+            sys.exit(f"reviewer {s} has no report yet ({p})")
+        parts.append(f"# Reviewer {i} ({tx[r['code']]['label']})\n\n{p.read_text(encoding='utf-8')}")
+    run.path("letter_input.md").write_text(f"# Manuscript: {st['title']}\n\n" + "\n\n".join(parts),
+                                            encoding="utf-8")
+    say(f"""
+EDITOR'S DECISION LETTER
+{RP.LETTER_SYS.format(journal=st['journal'])}
+
+The three reports: {run.path('letter_input.md')}
+Write the letter (Markdown) to {run.path('decision_letter.md')}.""")
+
+
+EN = {"稳定": "stable", "下降": "declining", "上升": "rising", "不可用": "not available",
+      "充分": "sufficient", "有限": "limited", "不足": "insufficient", "不适用": "not applicable",
+      "较低": "low", "中等": "medium", "较高": "high", "仅展示": "display only"}
+
+
+def journal_profile(journal_name, codes):
+    with open(C.ASSETS / "journal_topic_profiles.csv", encoding="utf-8-sig") as f:
+        rows = [r for r in csv.DictReader(f)
+                if r["journal"].lower() == journal_name.lower() and r["category"] in codes]
+    res = []
+    for code in codes:
+        r = next((x for x in rows if x["category"] == code), None)
+        if r is None:
+            continue
+        res.append({
+            "topic": f"{code} {r['category_label']}",
+            "recent_papers_2023_2025": int(r["recent_count"]),
+            "share_of_journal_research_articles_per_100": round(float(r["recent_share_per100"]), 2),
+            "share_trend_vs_2020_2022": EN.get(r["trend_label"], r["trend_label"]),
+            "share_relative_to_the_other_six_journals": EN.get(r["pressure_band"], r["pressure_band"]),
+            "citation_percentile_within_journal_and_year_2019_2023":
+                round(float(r["citation_score"]), 1) if r["citation_score"] else None,
+            "citation_papers": int(float(r["citation_n"] or 0)),
+            "citation_evidence": EN.get(r["citation_evidence"], r["citation_evidence"]),
+            "note": "citation percentile 50 = median paper of the same journal and year"})
+    return res
+
+
+def cmd_profile_brief(a):
+    run = C.Run(Path(a.run))
+    st = run.state
+    rows = journal_profile(st["journal"], [r["code"] for r in st["roles"]])
+    if not rows:
+        sys.exit(f"no profile data for {st['journal']}")
+    run.path("profile_input.md").write_text(
+        f"# Manuscript\n\nTitle: {st['title']}\n\nAbstract: {st['abstract']}\n\n"
+        f"# Publication record of {st['journal']} for the manuscript's topics\n\n"
+        + json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
+    say(f"""
+EDITOR'S NOTE ON THE JOURNAL PROFILE — write this without looking at the reviews or the decision
+{RP.PROFILE_SYS.format(journal=st['journal'])}
+
+Material: {run.path('profile_input.md')}
+Write the note (Markdown, a few sentences) to {run.path('profile_note.md')}.""")
+
+
+# ---------------------------------------------------------------------------------- report
+
+def cmd_report(a):
+    from .report import build
+    run = C.Run(Path(a.run))
+    p = build(run)
+    out({"report": str(p)})
+
+
+def cmd_index_info(a):
+    ix = index()
+    info = {k: ix.manifest[k] for k in ("name", "version", "papers", "with_abstract",
+                                         "with_fulltext", "journals", "years")}
+    info["location"] = str(ix.root)
+    if a.verify:
+        from .index_tools import verify
+        info["verify"] = verify(ix.root, ix.manifest)
+    out(info)
+
+
+def cmd_api_run(a):
+    from .api import run
+    run(a)
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(prog="envreview", description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    sp = ap.add_subparsers(dest="cmd", required=True)
+
+    p = sp.add_parser("start", help="parse the manuscript, pick the three reviewers")
+    p.add_argument("--input", required=True, help="manuscript: .pdf, .docx, .txt or .md")
+    p.add_argument("--journal", required=True, help="target journal (name, id or abbreviation)")
+    p.add_argument("--tag", required=True, help="short name for this run")
+    p.add_argument("--out", help="run directory (default ./envreview_runs/<tag>)")
+    p.add_argument("--title")
+    p.add_argument("--abstract-file")
+    p.add_argument("--before", type=int, help="only use literature up to this year")
+    p.add_argument("--exclude", nargs="*", default=[], help="DOIs kept out of retrieval")
+    p.add_argument("--topics", help="override the reviewer topics, e.g. D1,C7,I5")
+
+    p = sp.add_parser("editor-pack")
+    p.add_argument("--run", required=True)
+    p.add_argument("--query", action="append")
+    p.add_argument("--phrase", action="append")
+    for name in ("editor-prompt", "editor-decide"):
+        p = sp.add_parser(name)
+        p.add_argument("--run", required=True)
+        p.add_argument("--journal")
+    for name in ("reviewer-brief", "search", "fulltext", "check"):
+        p = sp.add_parser(name)
+        p.add_argument("--run", required=True)
+        p.add_argument("--seat", required=True, choices=SEATS)
+    for name in ("letter-brief", "profile-brief", "report"):
+        p = sp.add_parser(name)
+        p.add_argument("--run", required=True)
+    p = sp.add_parser("index-info")
+    p.add_argument("--verify", action="store_true")
+    p = sp.add_parser("api-run", help="run every step with a model API (estimate unless --yes)")
+    p.add_argument("--input", required=True)
+    p.add_argument("--journal", required=True)
+    p.add_argument("--tag", required=True)
+    p.add_argument("--model", default="gpt-5.6-sol",
+                   help="gpt-5.6-sol (OPENAI_API_KEY) or deepseek-v4-pro / deepseek-flash "
+                        "(DEEPSEEK_API_KEY)")
+    p.add_argument("--yes", action="store_true", help="actually run (paid)")
+    p.add_argument("--out")
+    p.add_argument("--title")
+    p.add_argument("--abstract-file")
+    p.add_argument("--before", type=int)
+    p.add_argument("--exclude", nargs="*", default=[])
+    p.add_argument("--topics")
+
+    a = ap.parse_args(argv)
+    {"start": cmd_start, "editor-pack": cmd_editor_pack, "editor-prompt": cmd_editor_prompt,
+     "editor-decide": cmd_editor_decide, "reviewer-brief": cmd_reviewer_brief,
+     "search": cmd_search, "fulltext": cmd_fulltext, "check": cmd_check,
+     "letter-brief": cmd_letter_brief, "profile-brief": cmd_profile_brief,
+     "report": cmd_report, "index-info": cmd_index_info, "api-run": cmd_api_run}[a.cmd](a)
+
+
+if __name__ == "__main__":
+    main()
