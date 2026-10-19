@@ -125,7 +125,7 @@ def run(a):
                 + run.path(f"seats/{s}/screening_table.md").read_text(encoding="utf-8")
                 + f"\n\n# The papers you read in full\n\n{full}")
         rep, u3 = call_text(a.model, sysmsg, user)
-        run.path(f"seats/{s}/report.md").write_text(rep + "\n", encoding="utf-8")
+        run.path(f"seats/{s}/review.md").write_text(rep + "\n", encoding="utf-8")
         return [u1, u2, u3]
 
     with ThreadPoolExecutor(3) as ex:

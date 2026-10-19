@@ -17,8 +17,8 @@ command takes `--run <run directory>`; all files live there, so any step can be 
 - **Index pack.** `$ENVR index-info` must print the pack details. If it says the pack is missing,
   stop and tell the user to download `env-journal-index-v1` and unpack it to
   `~/.envreview/env-journal-index-v1` (or set `ENVREVIEW_INDEX`) — see README.md.
-- **Python packages:** numpy, pandas, pyarrow, scipy, torch, transformers, pymupdf, python-docx,
-  jsonschema. The first search downloads the embedding model `BAAI/bge-large-en-v1.5` (~1.3 GB).
+- **Python packages:** `pip install -r <this skill folder>/requirements.txt`. The first search
+  downloads the embedding model `BAAI/bge-large-en-v1.5` (~1.3 GB).
 - Ask for the **target journal** if the user has not named one. Ask for the **latest year of
   literature** only if the manuscript is already published (use the year before publication);
   otherwise the default (this year) is right.
@@ -59,7 +59,7 @@ only its seat and the run directory, and tell it to follow the printed instructi
 ```
 $ENVR reviewer-brief --run <dir> --seat R1   # role + how to write queries -> seats/R1/queries.json
 $ENVR search         --run <dir> --seat R1   # 20 closest abstracts        -> seats/R1/screening.json
-$ENVR fulltext       --run <dir> --seat R1   # chosen papers in full       -> seats/R1/report.md
+$ENVR fulltext       --run <dir> --seat R1   # chosen papers in full       -> seats/R1/review.md
 $ENVR check          --run <dir> --seat R1   # recommendation, citations
 ```
 
@@ -67,7 +67,8 @@ Each command prints the reviewer's instructions for the next step and the files 
 write. The reviewer screens all 20 abstracts, picks at most five to read in full, and writes a
 report: one paragraph of overall assessment ending "I therefore recommend X.", then
 "Major Comments". If `check` warns about DOIs outside the screening table or a missing
-recommendation, the reviewer fixes the report and runs `check` again. Do the same for R2 and R3.
+recommendation, the reviewer fixes the report and runs `check` again; if it notes that the report
+is long, the reviewer makes one tightening pass. Do the same for R2 and R3.
 
 ## 4. Editor's letter and journal note
 

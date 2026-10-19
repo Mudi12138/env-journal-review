@@ -550,6 +550,17 @@ class TestEditorV3(EditorV3Fixture):
                 assessment, pack, self.journals["journal_a"], self.tiers["T1"]
             )
 
+    def test_review_wording_in_manuscript_full_text_does_not_force_review_label(self) -> None:
+        # Research papers cite reviews in their full text; only title + abstract decide.
+        pack = deepcopy(self.pack)
+        pack["fulltext"] = (
+            pack["abstract"] + " Introduction. A comprehensive review of plant control "
+            "strategies is given elsewhere."
+        )
+        editor_v3.validate_assessment(
+            self.valid_assessment(), pack, self.journals["journal_a"], self.tiers["T1"]
+        )
+
     def test_generic_novelty_magnitude_exceptionality_cannot_block(self) -> None:
         assessment = self.valid_assessment()
         axis = assessment["novelty_magnitude"]

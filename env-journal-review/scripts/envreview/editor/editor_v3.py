@@ -1322,7 +1322,9 @@ def validate_assessment(
                 f"Direct precedent {doi} evidence_quote is too short or general to ground provenance"
             )
 
-    manuscript_obvious_mode = _obvious_contribution_mode(manuscript_text)
+    # Title + abstract only, like the precedents: any full text mentions "a comprehensive
+    # review of ..." somewhere, which would force every research paper to be labelled a review.
+    manuscript_obvious_mode = _obvious_contribution_mode(_hit_text(pack))
     for item in comparisons:
         doi = str(item.get("doi", "")).strip().lower()
         hit_text = _hit_text(hits_by_doi[doi])

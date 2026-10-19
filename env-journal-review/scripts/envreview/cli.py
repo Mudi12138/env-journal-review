@@ -11,7 +11,7 @@ files in one run directory, so any step can be repeated.
   envreview editor-decide  --run DIR [--journal ID]
   envreview reviewer-brief --run DIR --seat R1           -> agent writes seats/R1/queries.json
   envreview search         --run DIR --seat R1           -> agent writes seats/R1/screening.json
-  envreview fulltext       --run DIR --seat R1           -> agent writes seats/R1/report.md
+  envreview fulltext       --run DIR --seat R1           -> agent writes seats/R1/review.md
   envreview check          --run DIR --seat R1
   envreview letter-brief   --run DIR                     -> agent writes decision_letter.md
   envreview profile-brief  --run DIR                     -> agent writes profile_note.md
@@ -36,6 +36,7 @@ from . import reviewer_prompts as RP
 
 SEATS = ["R1", "R2", "R3"]
 N_SCREEN, N_FULL, MAX_CHARS = 20, 5, 60000
+LONG_REPORT = 1400           # words; in testing, longer reports were judged too long to read
 DOI_RE = re.compile(r"10\.\d{4,9}/[^\s`\"'<>()\[\]*]+")
 DECISION_EN = {"送审": "send out for review", "拒稿": "reject", "校验失败": "validation failed"}
 RECS = ["reject and resubmit", "minor revision", "major revision", "acceptance", "rejection",
@@ -285,7 +286,7 @@ REVIEWER {a.seat} — step 3 of 3: write the report
 Manuscript: {run.path('manuscript.txt')}
 Your screening table: {run.path(d, 'screening_table.md')}
 The papers you read in full: {run.path(d, 'fulltexts.md')}
-Write the report (Markdown) to {run.path(d, 'report.md')}, then run:
+Write the report (Markdown) to {run.path(d, 'review.md')}, then run:
   envreview check --run "{run.dir}" --seat {a.seat}""")
 
 
@@ -303,7 +304,7 @@ def cmd_check(a):
     run = C.Run(Path(a.run))
     st = run.state
     d = f"seats/{a.seat}"
-    report = run.path(d, "report.md").read_text(encoding="utf-8")
+    report = run.path(d, "review.md").read_text(encoding="utf-8")
     cands = {c["doi"].lower(): c["doi"] for c in run.read_json(f"{d}/candidates.json")}
     full = {x.lower() for x in run.read_json(f"{d}/screening.json")["read_in_full"]}
     found = sorted({x.rstrip(".,;:").lower() for x in DOI_RE.findall(report)})
@@ -320,6 +321,11 @@ def cmd_check(a):
             "Remove them or replace them with screened papers.")
     if res["recommendation"] == "?":
         say('WARNING: no recommendation found; the first paragraph must end "I therefore recommend X."')
+    if res["words"] > LONG_REPORT:
+        say(f"NOTE: the report is {res['words']} words; readers take in about {LONG_REPORT} in the few "
+            "minutes they give a review. Consider one tightening pass: where a comment asks for "
+            "several changes, keep the one or two that matter most, and cut repeated context. Then "
+            "run check again. Do not drop a problem that affects the conclusions to save words.")
 
 
 # ---------------------------------------------------------------------------------- editor letter
@@ -330,7 +336,7 @@ def cmd_letter_brief(a):
     tx = C.taxonomy()
     parts = []
     for i, (s, r) in enumerate(zip(SEATS, st["roles"]), 1):
-        p = run.path("seats", s, "report.md")
+        p = run.path("seats", s, "review.md")
         if not p.exists():
             sys.exit(f"reviewer {s} has no report yet ({p})")
         parts.append(f"# Reviewer {i} ({tx[r['code']]['label']})\n\n{p.read_text(encoding='utf-8')}")

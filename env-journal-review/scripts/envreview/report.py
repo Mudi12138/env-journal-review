@@ -78,7 +78,7 @@ def build(run: C.Run):
     # 4. reviews
     L += ["## Reviewer reports", ""]
     for i, (s, r) in enumerate(zip(["R1", "R2", "R3"], st["roles"]), 1):
-        rep = _read(run, "seats", s, "report.md")
+        rep = _read(run, "seats", s, "review.md")
         if rep:
             L += [f"### Reviewer {i} — {tx[r['code']]['label']}", "", rep, ""]
 

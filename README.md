@@ -31,9 +31,9 @@ service by the skill itself.
 1. **Skill.** Copy the `env-journal-review/` folder to your agent's skills folder:
    - Claude Code: `~/.claude/skills/env-journal-review/`
    - Codex: `~/.codex/skills/env-journal-review/` (or `~/.agents/skills/`)
-2. **Python 3.10+** with
-   `pip install numpy pandas pyarrow scipy torch transformers pymupdf python-docx jsonschema`.
-   The first search downloads the embedding model `BAAI/bge-large-en-v1.5` (~1.3 GB).
+2. **Python 3.10+** with `pip install -r env-journal-review/requirements.txt` (a CPU build of
+   torch is enough). The first search downloads the embedding model `BAAI/bge-large-en-v1.5`
+   (~1.3 GB); after that, loading takes about 30 s and each search about 2 s.
 3. **Index pack** `env-journal-index-v1` (download link: see Releases). Unpack it to
    `~/.envreview/env-journal-index-v1/`, or anywhere and set `ENVREVIEW_INDEX` to that folder.
    Check with `python env-journal-review/scripts/envreview.py index-info --verify`.
