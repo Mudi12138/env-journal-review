@@ -9,4 +9,5 @@ pymupdf>=1.24.3      # [1.26.5, 2.0]  PDF manuscripts
 python-docx>=1.0     # [1.2.0]   Word manuscripts
 jsonschema>=4.0      # [4.23.0]
 huggingface_hub>=0.23 # [2.2.0]   index-download
+brotli>=1.2          # [1.2.0]   older brotli (e.g. Anaconda 1.0.9) breaks Hugging Face downloads
 # API mode only (api-run): openai>=1.40  [2.48.0]

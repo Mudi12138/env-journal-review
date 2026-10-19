@@ -52,11 +52,27 @@ NEEDED = {"numpy": "numpy", "pandas": "pandas", "pyarrow": "pyarrow", "scipy": "
           "docx": "python-docx", "jsonschema": "jsonschema", "huggingface_hub": "huggingface_hub"}
 
 
+def missing_packages() -> list[str]:
+    """Packages this Python lacks, plus brotli if it is too old: the HTTP client behind
+    huggingface_hub decodes compressed downloads with brotli and fails on brotli < 1.2
+    (Anaconda ships 1.0.9), which breaks index-download and the model download."""
+    missing = [pip for mod, pip in NEEDED.items() if importlib.util.find_spec(mod) is None]
+    if importlib.util.find_spec("brotli") is not None:
+        from importlib.metadata import PackageNotFoundError, version
+        try:
+            v = tuple(int(x) for x in version("brotli").split(".")[:2])
+        except (PackageNotFoundError, ValueError):
+            v = (0, 0)
+        if v < (1, 2):
+            missing.append("brotli>=1.2")
+    return missing
+
+
 def check_packages():
     """Fail early, with the install command for *this* interpreter, if a package is missing.
 
     Hosts often have several Pythons; without this the first sign is a traceback mid-review."""
-    missing = [pip for mod, pip in NEEDED.items() if importlib.util.find_spec(mod) is None]
+    missing = missing_packages()
     if missing:
         req = Path(__file__).resolve().parents[2] / "requirements.txt"
         entry = Path(__file__).resolve().parents[1] / "envreview.py"

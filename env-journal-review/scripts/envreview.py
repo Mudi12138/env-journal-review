@@ -6,7 +6,6 @@ Any Python 3.10+ can launch it. `setup` builds the skill's own environment in
 lacks the packages, the command runs in that environment instead, so the agent need not know
 which of the user's Pythons has them.
 """
-import importlib.util
 import os
 import subprocess
 import sys
@@ -22,7 +21,7 @@ for stream in (sys.stdout, sys.stderr):
         stream.reconfigure(encoding="utf-8", errors="replace")
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 sys.path.insert(0, str(HERE))
-from envreview.cli import NEEDED, main  # noqa: E402  (stdlib-only imports at module level)
+from envreview.cli import main, missing_packages  # noqa: E402  (stdlib-only module imports)
 
 
 def setup() -> int:
@@ -44,7 +43,7 @@ if __name__ == "__main__":
     if args[:1] == ["setup"]:
         sys.exit(setup())
     in_venv = Path(sys.prefix).resolve() == VENV.resolve()
-    missing = any(importlib.util.find_spec(m) is None for m in NEEDED)
+    missing = bool(missing_packages())
     if missing and not in_venv and VENV_PY.exists():
         sys.exit(subprocess.run([str(VENV_PY), str(Path(__file__).resolve()), *args]).returncode)
     main()
