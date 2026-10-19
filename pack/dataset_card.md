@@ -19,7 +19,8 @@ configs:
 
 # Environmental journal index
 
-The literature index used by env-journal-review, an agent skill for
+The literature index used by
+[env-journal-review](https://github.com/Mudi12138/env-journal-review), an agent skill for
 AI pre-submission review of environmental science and engineering manuscripts. The skill's
 editor and reviewers search this index to judge how new a manuscript is and read the closest
 papers in full.

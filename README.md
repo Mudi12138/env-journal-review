@@ -28,20 +28,37 @@ service by the skill itself.
 
 ## Install
 
-1. **Skill.** Copy the `env-journal-review/` folder to your agent's skills folder:
-   - Claude Code: `~/.claude/skills/env-journal-review/`
-   - Codex: `~/.codex/skills/env-journal-review/` (or `~/.agents/skills/`)
-2. **Python 3.10+.** `python env-journal-review/scripts/envreview.py setup` builds the skill's
-   own environment in `~/.envreview/venv` (about 1.4 GB, a few minutes); after that, commands
-   run there whichever Python starts them. Or install `env-journal-review/requirements.txt`
-   into an environment of your own (a CPU build of torch is enough). The first search downloads
-   the embedding model `BAAI/bge-large-en-v1.5` (~1.3 GB); after that, loading takes about 30 s
-   and each search about 2 s.
-3. **Index pack** (about 690 MB, hosted on Hugging Face as
-   [`Mudi12137/env-journal-index`](https://huggingface.co/datasets/Mudi12137/env-journal-index)):
-   `python env-journal-review/scripts/envreview.py index-download` fetches tag `v1` to
-   `~/.envreview/env-journal-index-v1/` and checks every file. To keep it elsewhere, set
-   `ENVREVIEW_INDEX` to that folder first. Your agent will also offer to run this on first use.
+You need git and Python 3.10 or newer.
+
+```
+git clone https://github.com/Mudi12138/env-journal-review
+cd env-journal-review
+python env-journal-review/scripts/envreview.py setup            # once: ~1.4 GB, a few minutes
+python env-journal-review/scripts/envreview.py index-download   # once: ~690 MB
+```
+
+Then copy the skill folder to your agent's skills folder:
+
+| Agent | macOS / Linux | Windows (PowerShell) |
+|---|---|---|
+| Claude Code | `cp -r env-journal-review ~/.claude/skills/` | `Copy-Item -Recurse env-journal-review $HOME\.claude\skills\` |
+| Codex | `cp -r env-journal-review ~/.codex/skills/` | `Copy-Item -Recurse env-journal-review $HOME\.codex\skills\` |
+
+Open a new session and ask, for example: *"Pre-review paper.pdf for Water Research"* or
+*"预审这篇稿子，投 ES&T"*.
+
+Details:
+
+- **`setup`** builds the skill's own environment in `~/.envreview/venv`; afterwards every
+  command runs there, whichever Python starts it. To use an environment of your own instead,
+  install `env-journal-review/requirements.txt` into it (a CPU build of torch is enough).
+- **`index-download`** fetches tag `v1` of
+  [`Mudi12137/env-journal-index`](https://huggingface.co/datasets/Mudi12137/env-journal-index)
+  to `~/.envreview/env-journal-index-v1/` and checks every file; it resumes if interrupted. To
+  keep the index elsewhere, set `ENVREVIEW_INDEX` to that folder first.
+- The first search downloads the embedding model `BAAI/bge-large-en-v1.5` (~1.3 GB). After
+  that, loading takes about 30 s and each search about 2 s on a laptop CPU.
+- If you skip these steps, the agent will tell you what is missing and offer to run them.
 
 Then ask your agent, for example: *"Pre-review paper.pdf for Water Research."*
 
