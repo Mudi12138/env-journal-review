@@ -11,6 +11,8 @@ SKILL = PKG.parent.parent                              # the skill folder
 ASSETS = SKILL / "assets"
 EDITOR = PKG / "editor"
 INDEX_NAME = "env-journal-index-v1"
+# where index-download fetches the pack; the tag pins the exact version the code expects
+HF_REPO, HF_REVISION = "Mudi12137/env-journal-index", "v1"
 
 JOURNAL_ALIASES = {
     "es&t": "environmental_science_technology", "est": "environmental_science_technology",

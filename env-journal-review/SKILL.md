@@ -15,8 +15,8 @@ command takes `--run <run directory>`; all files live there, so any step can be 
 ## 0. Before you start
 
 - **Index pack.** `$ENVR index-info` must print the pack details. If it says the pack is missing,
-  stop and tell the user to download `env-journal-index-v1` and unpack it to
-  `~/.envreview/env-journal-index-v1` (or set `ENVREVIEW_INDEX`) — see README.md.
+  run `$ENVR index-download` (about 690 MB, once; it resumes if interrupted and verifies every
+  file). Tell the user before starting the download.
 - **Python packages:** `pip install -r <this skill folder>/requirements.txt`. The first search
   downloads the embedding model `BAAI/bge-large-en-v1.5` (~1.3 GB).
 - Ask for the **target journal** if the user has not named one. Ask for the **latest year of

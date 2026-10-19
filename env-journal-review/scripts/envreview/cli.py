@@ -50,8 +50,8 @@ def index():
     if _INDEX is None:
         root = C.index_dir()
         if not (root / "manifest.json").exists():
-            sys.exit(f"Index pack not found at {root}. Download {C.INDEX_NAME} and unpack it there, "
-                     "or set ENVREVIEW_INDEX to its folder (see the skill's README).")
+            sys.exit(f"Index pack not found at {root}. Run `envreview.py index-download` "
+                     "(about 690 MB, once), or set ENVREVIEW_INDEX to a folder holding the pack.")
         from .index import LocalIndex
         _INDEX = LocalIndex(root)
     return _INDEX
@@ -416,6 +416,26 @@ def cmd_index_info(a):
     out(info)
 
 
+def cmd_index_download(a):
+    """Fetch the index pack from Hugging Face into the index folder, then verify every file."""
+    try:
+        from huggingface_hub import snapshot_download
+    except ImportError:
+        sys.exit("Needs huggingface_hub: pip install -r requirements.txt")
+    from .index_tools import verify
+    dest = C.index_dir()
+    say(f"Downloading {C.HF_REPO} ({C.HF_REVISION}, about 690 MB) to {dest}. "
+        "An interrupted download resumes when you run this again.")
+    snapshot_download(repo_id=C.HF_REPO, repo_type="dataset", revision=C.HF_REVISION,
+                      local_dir=dest, allow_patterns=["manifest.json", "*.parquet", "*.npy",
+                                                      "*.npz", "*.json", "*.sqlite"])
+    manifest = json.loads((dest / "manifest.json").read_text(encoding="utf-8"))
+    res = verify(dest, manifest)
+    out({"location": str(dest), "papers": manifest["papers"], "verify": res})
+    if not res["ok"]:
+        sys.exit("Some files do not match the manifest; run index-download again.")
+
+
 def cmd_api_run(a):
     from .api import run
     run(a)
@@ -454,6 +474,7 @@ def main(argv=None):
         p.add_argument("--run", required=True)
     p = sp.add_parser("index-info")
     p.add_argument("--verify", action="store_true")
+    sp.add_parser("index-download", help="fetch and verify the index pack (about 690 MB, once)")
     p = sp.add_parser("api-run", help="run every step with a model API (estimate unless --yes)")
     p.add_argument("--input", required=True)
     p.add_argument("--journal", required=True)
@@ -474,7 +495,8 @@ def main(argv=None):
      "editor-decide": cmd_editor_decide, "reviewer-brief": cmd_reviewer_brief,
      "search": cmd_search, "fulltext": cmd_fulltext, "check": cmd_check,
      "letter-brief": cmd_letter_brief, "profile-brief": cmd_profile_brief,
-     "report": cmd_report, "index-info": cmd_index_info, "api-run": cmd_api_run}[a.cmd](a)
+     "report": cmd_report, "index-info": cmd_index_info, "index-download": cmd_index_download,
+     "api-run": cmd_api_run}[a.cmd](a)
 
 
 if __name__ == "__main__":

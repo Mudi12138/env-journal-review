@@ -34,9 +34,11 @@ service by the skill itself.
 2. **Python 3.10+** with `pip install -r env-journal-review/requirements.txt` (a CPU build of
    torch is enough). The first search downloads the embedding model `BAAI/bge-large-en-v1.5`
    (~1.3 GB); after that, loading takes about 30 s and each search about 2 s.
-3. **Index pack** `env-journal-index-v1` (download link: see Releases). Unpack it to
-   `~/.envreview/env-journal-index-v1/`, or anywhere and set `ENVREVIEW_INDEX` to that folder.
-   Check with `python env-journal-review/scripts/envreview.py index-info --verify`.
+3. **Index pack** (about 690 MB, hosted on Hugging Face as
+   [`Mudi12137/env-journal-index`](https://huggingface.co/datasets/Mudi12137/env-journal-index)):
+   `python env-journal-review/scripts/envreview.py index-download` fetches tag `v1` to
+   `~/.envreview/env-journal-index-v1/` and checks every file. To keep it elsewhere, set
+   `ENVREVIEW_INDEX` to that folder first. Your agent will also offer to run this on first use.
 
 Then ask your agent, for example: *"Pre-review paper.pdf for Water Research."*
 
@@ -69,4 +71,4 @@ pack/                        maintainer tools that build the index pack
 
 ## License
 
-Code and prompts: MIT (see LICENSE). The index pack is distributed separately with its own terms.
+Code and prompts: MIT (see LICENSE). The index pack is hosted separately on Hugging Face; its dataset card states its terms.
