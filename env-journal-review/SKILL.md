@@ -14,10 +14,11 @@ command takes `--run <run directory>`; all files live there, so any step can be 
 
 ## 0. Before you start
 
-- **Python.** Run `$ENVR index-info` first. If it reports missing packages, use a Python that
-  has them (a project virtual environment, if the user has one) as the `python` in `ENVR`;
-  otherwise ask the user before running the install command it prints. The first search
-  downloads the embedding model `BAAI/bge-large-en-v1.5` (~1.3 GB).
+- **Python.** Any Python 3.10+ can run `ENVR`. Run `$ENVR index-info` first. If it reports
+  missing packages, tell the user and, with their agreement, run `$ENVR setup`: it builds the
+  skill's own environment (`~/.envreview/venv`, about 1.4 GB, a few minutes, once), and every
+  later command switches to it by itself. The first search also downloads the embedding model
+  `BAAI/bge-large-en-v1.5` (~1.3 GB).
 - **Index pack.** If `index-info` says the pack is missing, tell the user and run
   `$ENVR index-download` (about 690 MB, once; it resumes if interrupted and verifies every file).
 - Ask for the **target journal** if the user has not named one. Ask for the **latest year of

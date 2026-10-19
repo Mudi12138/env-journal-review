@@ -44,6 +44,18 @@ def _flat(text: str, vocab: set[str] | None = None) -> str:
     return re.sub(r"\s+\d{1,3}$", "", text)              # a trailing page or footnote number
 
 
+def _line_text(spans) -> str:
+    """Join a line's spans. PyMuPDF 2 gives one span per word without the spaces, 1.x one span
+    per run with them, so a space is inserted wherever the spans are visibly apart."""
+    out = spans[0]["text"]
+    for prev, s in zip(spans, spans[1:]):
+        gap = s["bbox"][0] - prev["bbox"][2]
+        if gap > 0.15 * s["size"] and not out.endswith(" ") and not s["text"].startswith(" "):
+            out += " "
+        out += s["text"]
+    return out.strip()
+
+
 def _pdf_first_page(doc) -> tuple[str, list[str]]:
     """Title (the largest text on page 1 that reads like a title) and page-1 text blocks."""
     d = doc[0].get_text("dict")
@@ -54,8 +66,8 @@ def _pdf_first_page(doc) -> tuple[str, list[str]]:
         for ln in b.get("lines", []):
             spans = [s for s in ln["spans"] if s["text"].strip()]
             if spans:
-                t = "".join(s["text"] for s in spans).strip()
-                lines.append((round(max(s["size"] for s in spans), 1), t))
+                t = _line_text(spans)
+                lines.append((round(max(s["size"] for s in spans)), t))
                 btxt.append(t)
         if btxt:
             blocks.append(_clean("\n".join(btxt)))
@@ -69,7 +81,10 @@ def _pdf_first_page(doc) -> tuple[str, list[str]]:
 
 
 def read_pdf(path: Path) -> tuple[str, str, list[str]]:
-    import fitz  # PyMuPDF
+    try:
+        import pymupdf as fitz           # PyMuPDF >= 1.24.3
+    except ImportError:
+        import fitz
 
     with fitz.open(path) as doc:
         text = "\n".join(page.get_text() for page in doc)

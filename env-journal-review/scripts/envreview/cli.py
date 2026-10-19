@@ -17,6 +17,7 @@ files in one run directory, so any step can be repeated.
   envreview profile-brief  --run DIR                     -> agent writes profile_note.md
   envreview report         --run DIR
   envreview index-info [--verify]
+  envreview setup                                        -> the skill's own Python environment (once)
   envreview index-download                               -> fetch the index pack (once)
 
 Output is JSON on stdout unless a command prints instructions for the agent.
@@ -58,9 +59,12 @@ def check_packages():
     missing = [pip for mod, pip in NEEDED.items() if importlib.util.find_spec(mod) is None]
     if missing:
         req = Path(__file__).resolve().parents[2] / "requirements.txt"
+        entry = Path(__file__).resolve().parents[1] / "envreview.py"
         sys.exit(f"Missing Python packages for {sys.executable}: {', '.join(missing)}.\n"
-                 f"Install them with:\n  \"{sys.executable}\" -m pip install -r \"{req}\"\n"
-                 "or run envreview with a Python that already has them.")
+                 f"Set up the skill's own environment once (about 1.4 GB, a few minutes):\n"
+                 f"  \"{sys.executable}\" \"{entry}\" setup\n"
+                 f"or install them into this Python:\n"
+                 f"  \"{sys.executable}\" -m pip install -r \"{req}\"")
 
 
 def index():
@@ -93,6 +97,8 @@ def say(text: str) -> None:
 # ---------------------------------------------------------------------------------- start
 
 def cmd_start(a):
+    if not Path(a.input).is_file():
+        sys.exit(f"Manuscript not found: {Path(a.input).resolve()}")
     run = C.Run(Path(a.out) if a.out else Path.cwd() / "envreview_runs" / a.tag)
     ms = M.load(Path(a.input), a.title,
                 Path(a.abstract_file).read_text(encoding="utf-8") if a.abstract_file else None)
@@ -493,6 +499,7 @@ def main(argv=None):
     p = sp.add_parser("index-info")
     p.add_argument("--verify", action="store_true")
     sp.add_parser("index-download", help="fetch and verify the index pack (about 690 MB, once)")
+    sp.add_parser("setup", help="create ~/.envreview/venv with the required packages (once)")
     p = sp.add_parser("api-run", help="run every step with a model API (estimate unless --yes)")
     p.add_argument("--input", required=True)
     p.add_argument("--journal", required=True)
@@ -515,6 +522,7 @@ def main(argv=None):
      "search": cmd_search, "fulltext": cmd_fulltext, "check": cmd_check,
      "letter-brief": cmd_letter_brief, "profile-brief": cmd_profile_brief,
      "report": cmd_report, "index-info": cmd_index_info, "index-download": cmd_index_download,
+     "setup": lambda a: sys.exit("Run setup as: python scripts/envreview.py setup"),
      "api-run": cmd_api_run}[a.cmd](a)
 
 

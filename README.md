@@ -31,9 +31,12 @@ service by the skill itself.
 1. **Skill.** Copy the `env-journal-review/` folder to your agent's skills folder:
    - Claude Code: `~/.claude/skills/env-journal-review/`
    - Codex: `~/.codex/skills/env-journal-review/` (or `~/.agents/skills/`)
-2. **Python 3.10+** with `pip install -r env-journal-review/requirements.txt` (a CPU build of
-   torch is enough). The first search downloads the embedding model `BAAI/bge-large-en-v1.5`
-   (~1.3 GB); after that, loading takes about 30 s and each search about 2 s.
+2. **Python 3.10+.** `python env-journal-review/scripts/envreview.py setup` builds the skill's
+   own environment in `~/.envreview/venv` (about 1.4 GB, a few minutes); after that, commands
+   run there whichever Python starts them. Or install `env-journal-review/requirements.txt`
+   into an environment of your own (a CPU build of torch is enough). The first search downloads
+   the embedding model `BAAI/bge-large-en-v1.5` (~1.3 GB); after that, loading takes about 30 s
+   and each search about 2 s.
 3. **Index pack** (about 690 MB, hosted on Hugging Face as
    [`Mudi12137/env-journal-index`](https://huggingface.co/datasets/Mudi12137/env-journal-index)):
    `python env-journal-review/scripts/envreview.py index-download` fetches tag `v1` to
