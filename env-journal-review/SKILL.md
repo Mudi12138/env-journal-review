@@ -1,6 +1,6 @@
 ---
 name: env-journal-review
-description: "Pre-submission peer review for environmental science and engineering manuscripts targeting Environmental Science & Technology, Water Research, Nature Water, Nature Sustainability, Nature Climate Change, Nature Geoscience or One Earth. An AI editor screens the manuscript against the target journal's official scope and tier, and three AI reviewers — each from the environmental topic closest to the paper — search a local index of ~40,000 papers from these journals, screen the 20 closest, read the most relevant in full, and write reports focused on whether the contribution is new and whether the conclusions are supported. Produces an editor's decision letter and a single report for the author. Use when the user asks to review, pre-review, critique or assess a manuscript before submission to one of these journals, asks whether a paper is likely to be desk-rejected or what reviewers will say, or says 预审, 审稿, 投稿前评估, 模拟审稿, 看看能不能投 ES&T / Water Research / Nature Water. Also searches the same index on its own: look up papers by DOI, find papers on a topic in plain language, find papers similar to a given one, export a full text, and open the matching local PDF; use when the user asks to find, search or look up literature or a DOI in these journals (查文献, 找文献, 文献检索, 查 DOI, 找相似文献)."
+description: "Pre-submission review of environmental science and engineering manuscripts for Environmental Science & Technology, Water Research, Nature Water, Nature Sustainability, Nature Climate Change, Nature Geoscience or One Earth. An AI editor screens the manuscript against the journal's scope and tier; three AI reviewers from the closest environmental topics search a local index of ~40,000 papers from these journals, read the closest in full, and judge whether the work is new and the conclusions supported; the result is an editor's letter and one report. Use when the user wants a manuscript reviewed or pre-reviewed before submission to one of these journals, or asks whether it would be desk-rejected (预审, 审稿, 投稿前评估, 模拟审稿, 看看能不能投 ES&T). Also searches the index directly: DOI lookup, topic search, similar papers, full text and local PDFs (查文献, 找文献, 文献检索, 查 DOI, 找相似文献)."
 ---
 
 # Environmental journal pre-submission review
@@ -115,7 +115,12 @@ $ENVR lit pdfs --dir "<folder of PDFs>"                   # once: link local PDF
 - Present the results the user needs (title, journal, year, DOI, and the PDF path when there is
   one) in the user's language; summarise abstracts when asked, and say that the search covers
   only these seven journals.
-- PDFs are matched by file name: the part of the DOI after the first "/" (`acs.est.4c10919.pdf`).
-  Water Research and One Earth papers usually have no PDF; offer `lit text` instead.
+- **Local PDFs.** If the results say "no PDF folder set", ask the user once whether they have a
+  folder of these papers' PDFs and where it is (e.g. where they unpacked the PDF package); then run
+  `$ENVR lit pdfs --dir "<that folder>"` and repeat the search. The link is remembered, so do not
+  ask again. If results say "PDF mapped but not found", the folder has moved: ask for its new
+  location and run `lit pdfs --dir` again. PDFs are matched by file name, the part of the DOI after
+  the first "/" (`acs.est.4c10919.pdf`), anywhere under the folder.
+- Water Research and One Earth papers usually have no PDF; offer `lit text` instead.
 - Use `--open` only when the user asks to open a paper.
 
