@@ -91,3 +91,22 @@ pack/                        maintainer tools that build the index pack
 
 Code and prompts: MIT (see LICENSE). The index pack is hosted separately on Hugging Face; its
 dataset card states its terms.
+
+## Hidden feature: literature search
+
+Not part of the review workflow, and not needed for it: the same index can be searched on its own.
+Ask your agent, for example, *"find recent ES&T papers on N2O from wastewater treatment"* or
+*"look up 10.1021/acs.est.4c10919"*, or run the commands yourself:
+
+```
+python env-journal-review/scripts/envreview.py lit doi 10.1021/acs.est.4c10919
+python env-journal-review/scripts/envreview.py lit search "machine learning prediction of N2O emissions from WWTPs" --years 2020-2025
+python env-journal-review/scripts/envreview.py lit similar 10.1021/acs.est.4c10919 --journal "ES&T"
+python env-journal-review/scripts/envreview.py lit text 10.1016/j.watres.2024.122935
+```
+
+`similar` ranks papers by the cosine similarity of their title-and-abstract embeddings, so it
+finds papers on the same subject whether or not they cite each other. If you have the PDFs of
+these papers, each named by the part of its DOI after the first `/` (`acs.est.4c10919.pdf`), run
+`lit pdfs --dir <folder>` once; results then show each paper's PDF, and `lit doi ... --open`
+opens it. No PDFs are distributed with this repository.

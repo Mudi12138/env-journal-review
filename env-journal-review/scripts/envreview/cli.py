@@ -19,6 +19,7 @@ files in one run directory, so any step can be repeated.
   envreview index-info [--verify]
   envreview setup                                        -> the skill's own Python environment (once)
   envreview index-download                               -> fetch the index pack (once)
+  envreview lit doi|search|similar|text|pdfs ...         -> literature search (see lit.py)
 
 Output is JSON on stdout unless a command prints instructions for the agent.
 """
@@ -34,6 +35,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from . import common as C
+from . import lit
 from . import manuscript as M
 from . import reviewer_prompts as RP
 
@@ -516,6 +518,7 @@ def main(argv=None):
     p.add_argument("--verify", action="store_true")
     sp.add_parser("index-download", help="fetch and verify the index pack (about 690 MB, once)")
     sp.add_parser("setup", help="create ~/.envreview/venv with the required packages (once)")
+    lit.add_parser(sp)
     p = sp.add_parser("api-run", help="run every step with a model API (estimate unless --yes)")
     p.add_argument("--input", required=True)
     p.add_argument("--journal", required=True)
@@ -539,6 +542,7 @@ def main(argv=None):
      "letter-brief": cmd_letter_brief, "profile-brief": cmd_profile_brief,
      "report": cmd_report, "index-info": cmd_index_info, "index-download": cmd_index_download,
      "setup": lambda a: sys.exit("Run setup as: python scripts/envreview.py setup"),
+     "lit": lambda a: lit.cmd(a, index()),
      "api-run": cmd_api_run}[a.cmd](a)
 
 

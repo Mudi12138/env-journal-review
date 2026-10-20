@@ -6,7 +6,8 @@ are fused by reciprocal-rank fusion:
   bm25    lexical ranking over title + abstract
   phrase  exact substring match over title + abstract, newest first; a phrase matching more
           papers than one path keeps (per_path) is skipped as too common
-Filters (publication year, excluded DOIs) are applied before ranking.
+Filters (publication years, journals, excluded DOIs) are applied before ranking. `similar`
+ranks papers by cosine similarity of their stored title+abstract embeddings to one paper's.
 """
 from __future__ import annotations
 
@@ -73,10 +74,14 @@ class LocalIndex:
         return h.cpu().numpy().astype(np.float32)
 
     # ---- retrieval -------------------------------------------------------------
-    def _mask(self, before=None, exclude=()):
+    def _mask(self, before=None, exclude=(), after=None, journals=()):
         mask = np.ones(len(self.d), bool)
         if before:
             mask &= self.year <= int(before)
+        if after:
+            mask &= self.year >= int(after)
+        if journals:
+            mask &= self.d.journal_std.isin(list(journals)).to_numpy()
         ex = {x.lower().strip() for x in exclude}
         if ex:
             mask &= ~np.isin(self.doi, list(ex))
@@ -92,8 +97,9 @@ class LocalIndex:
         idx = idx[np.argsort(-s[idx])]
         return idx[np.isfinite(s[idx])]
 
-    def search(self, queries, phrases=(), before=None, exclude=(), topk=30, per_path=300):
-        mask = self._mask(before, exclude)
+    def search(self, queries, phrases=(), before=None, exclude=(), topk=30, per_path=300,
+               after=None, journals=()):
+        mask = self._mask(before, exclude, after, journals)
         contrib, scores = defaultdict(list), defaultdict(float)
 
         def add(idx, label):
@@ -143,6 +149,22 @@ class LocalIndex:
                "abstract": r.abstract or "", "has_fulltext": bool(r.has_fulltext)}
         out.update(extra)
         return out
+
+    def row(self, doi):
+        """Row number of a DOI in the corpus, or None."""
+        i = np.where(self.doi == doi.lower().strip())[0]
+        return int(i[0]) if len(i) else None
+
+    def similar(self, doi, topk=20, before=None, after=None, journals=()):
+        """Papers whose title+abstract embedding is closest to this paper's (cosine; the
+        vectors are L2-normalised, so a dot product). No model is loaded."""
+        i = self.row(doi)
+        if i is None:
+            return None
+        mask = self._mask(before, exclude=[doi], after=after, journals=journals)
+        sims = self.emb @ self.emb[i]
+        return [self.record(int(j), similarity=round(float(sims[j]), 4))
+                for j in self._top(sims, mask, topk)]
 
     # ---- full text -------------------------------------------------------------
     def fulltext(self, dois, max_chars=60000):
