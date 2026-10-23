@@ -226,7 +226,7 @@ of its recent output falls in each topic and whether that share is rising or fal
 papers in the topic have been cited compared with the other papers the journal published in the
 same years.
 
-Write a short note of a few sentences for the end of your letter, giving your reflection on what
+Write a short note of a few sentences to the authors, giving your reflection on what
 this record means for the manuscript — for example, whether the topic is well established or rare
 in this journal, and what that implies for how the authors should present their contribution to
 the journal's readers or set it apart from what the journal has already published.

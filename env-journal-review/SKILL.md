@@ -6,7 +6,8 @@ description: "Pre-submission review of environmental science and engineering man
 # Environmental journal pre-submission review
 
 You run an editorial process for one manuscript and one target journal: an editor's screening,
-three independent reviewers, and an editor's letter, all grounded in a local literature index.
+three independent reviewers and, if the user wants one, an editor's letter, all grounded in a
+local literature index.
 The mechanical parts are commands; the reading and writing are yours.
 
 Command prefix used below: `ENVR="python <this skill folder>/scripts/envreview.py"`. Every
@@ -21,9 +22,21 @@ command takes `--run <run directory>`; all files live there, so any step can be 
   `BAAI/bge-large-en-v1.5` (~1.3 GB).
 - **Index pack.** If `index-info` says the pack is missing, tell the user and run
   `$ENVR index-download` (about 690 MB, once; it resumes if interrupted and verifies every file).
-- Ask for the **target journal** if the user has not named one. Ask for the **latest year of
-  literature** only if the manuscript is already published (use the year before publication);
-  otherwise the default (this year) is right.
+- **Ask the user, in one message, before starting** (skip what they have already said; offer the
+  defaults so they can simply say "defaults"):
+  1. **Target journal** — required if not named.
+  2. **Who writes the reviews** — *this agent* (default: no extra cost, takes 20–40 minutes) or
+     *a model API* (OpenAI `gpt-5.6-sol` or DeepSeek `deepseek-v4-pro` / `deepseek-flash`; needs
+     `OPENAI_API_KEY` or `DEEPSEEK_API_KEY` in the environment). For the API, run
+     `$ENVR api-run --input <file> --journal "<journal>" --tag <name> --model <model>` first:
+     it only prints a cost estimate. Show it, and run again with `--yes` only after the user
+     agrees; add `--letter` if they chose one. That command does every step below by itself,
+     so then go straight to step 5.
+  3. **Editor's letter** consolidating the three reviews — off by default.
+  4. **Other journals** — whether to also see how the editor's screening fares at any of the
+     other six journals (default: no).
+  Ask for the **latest year of literature** only if the manuscript is already published (use the
+  year before publication); otherwise the default (this year) is right.
 
 ## 1. Start
 
@@ -72,20 +85,22 @@ report: one paragraph of overall assessment ending "I therefore recommend X.", t
 recommendation, the reviewer fixes the report and runs `check` again; if it notes that the report
 is long, the reviewer makes one tightening pass. Do the same for R2 and R3.
 
-## 4. Editor's letter and journal note
+## 4. Journal note, and the editor's letter if chosen
 
-- `$ENVR letter-brief --run <dir>` — write `decision_letter.md` from the three reports.
 - `$ENVR profile-brief --run <dir>` — **in a fresh context that has not seen the reviews or the
   decision**, write `profile_note.md` (a few sentences, reference only).
+- Only if the user chose a letter: `$ENVR letter-brief --run <dir>` — write `decision_letter.md`
+  from the three reports.
 
 ## 5. Report
 
-`$ENVR report --run <dir>` assembles `report.md`: verdicts at a glance, the editor's letter,
-how crowded the manuscript's niche is and its closest precedents, the editor's screening by
-axis, the three reports, and the literature each reviewer used.
+`$ENVR report --run <dir>` assembles `report.md`: verdicts at a glance, the editor's letter (if
+any), the journal note, how crowded the manuscript's niche is and its closest precedents, the
+editor's screening by axis, the three reports, and the literature each reviewer used.
 
 Then give the user, in their language: the editor's verdict, the reviewers' recommendations,
-the three to five changes that matter most (from the letter), and the path to `report.md`.
+the three to five changes that matter most (from the letter if there is one, otherwise the
+problems the reviewers share, most important first), and the path to `report.md`.
 Keep the reports themselves in English. Say plainly that this is an AI pre-review for preparing
 the submission, not a prediction of the editorial outcome.
 

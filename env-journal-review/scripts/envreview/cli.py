@@ -527,6 +527,8 @@ def main(argv=None):
                    help="gpt-5.6-sol (OPENAI_API_KEY) or deepseek-v4-pro / deepseek-flash "
                         "(DEEPSEEK_API_KEY)")
     p.add_argument("--yes", action="store_true", help="actually run (paid)")
+    p.add_argument("--letter", action="store_true",
+                   help="also write the editor's decision letter (off by default)")
     p.add_argument("--out")
     p.add_argument("--title")
     p.add_argument("--abstract-file")

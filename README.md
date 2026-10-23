@@ -17,10 +17,15 @@ Geoscience** or **One Earth** — and it runs a small editorial process:
    papers that already do what the manuscript claims, reads up to five of them in full, and
    writes a report focused on **whether the contribution is new** and **whether the conclusions
    are supported**.
-3. **Editor's letter** consolidating the three reports, and a short note on how common the
-   manuscript's topics are in the target journal (reference only).
-4. **One report** for the author: verdicts, the letter, the closest precedents, the screening by
-   axis, the three reports and the literature each reviewer used.
+3. **A short note** on how common the manuscript's topics are in the target journal (reference
+   only), and, if you ask for one, an **editor's letter** consolidating the three reports.
+4. **One report** for the author: verdicts, the closest precedents, the screening by axis, the
+   three reports and the literature each reviewer used.
+
+Before starting, the agent asks a few questions: the target journal, whether the reviews are
+written by **the agent you are using** (default) or by **a model API** (OpenAI or DeepSeek; you
+see a cost estimate first), whether you want the editor's letter, and whether to compare other
+journals.
 
 The agent you are already using does the reading and writing; the bundled command-line tool does
 the mechanical work (parsing, retrieval, validation, assembly). Nothing is sent to a third-party

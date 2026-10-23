@@ -59,7 +59,8 @@ def build(run: C.Run):
         L += ["## Editor's letter", "", _embed(letter), ""]
     note = _read(run, "profile_note.md")
     if note:
-        L += ["### The journal's record for these topics (reference only)", "", _embed(note), ""]
+        level = "###" if letter else "##"            # under the letter, or on its own
+        L += [f"{level} The journal's record for these topics (reference only)", "", _embed(note), ""]
 
     # 2. novelty: the closest papers across the three reviewers, then each reviewer's reading
     L += ["## How new is the work?", "",

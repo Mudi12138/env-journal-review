@@ -135,11 +135,12 @@ def run(a):
     for s in cli.SEATS:
         cli.cmd_check(Namespace(run=str(run_dir), seat=s))
 
-    _quiet(cli.cmd_letter_brief, Namespace(run=str(run_dir)))
-    letter, u = call_text(a.model, RP.LETTER_SYS.format(journal=st["journal"]),
-                          run.path("letter_input.md").read_text(encoding="utf-8"))
-    log(u)
-    run.path("decision_letter.md").write_text(letter + "\n", encoding="utf-8")
+    if getattr(a, "letter", False):
+        _quiet(cli.cmd_letter_brief, Namespace(run=str(run_dir)))
+        letter, u = call_text(a.model, RP.LETTER_SYS.format(journal=st["journal"]),
+                              run.path("letter_input.md").read_text(encoding="utf-8"))
+        log(u)
+        run.path("decision_letter.md").write_text(letter + "\n", encoding="utf-8")
     try:
         _quiet(cli.cmd_profile_brief, Namespace(run=str(run_dir)))
         note, u = call_text(a.model, RP.PROFILE_SYS.format(journal=st["journal"]),
