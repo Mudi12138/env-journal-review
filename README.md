@@ -65,6 +65,30 @@ Details:
   that, loading takes about 30 s and each search about 2 s on a laptop CPU.
 - If you skip these steps, the agent will tell you what is missing and offer to run them.
 
+## Using a model API instead of your agent
+
+By default the agent you are using writes the editor's evidence and the reviews. You can instead
+have a model API do every step (`api-run`); the agent shows a cost estimate first.
+
+| `--provider` | Service | Key variable | Default model |
+|---|---|---|---|
+| `openai` | OpenAI | `OPENAI_API_KEY` | `gpt-5.6-sol` |
+| `claude` | Anthropic | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` |
+| `gemini` | Google | `GEMINI_API_KEY` | — |
+| `deepseek` | DeepSeek | `DEEPSEEK_API_KEY` | `deepseek-v4-pro` |
+| `qwen` | Alibaba DashScope | `DASHSCOPE_API_KEY` | — |
+| `doubao` | Volcano Ark | `ARK_API_KEY` | — |
+| `kimi` | Moonshot | `MOONSHOT_API_KEY` | — |
+| `glm` | Zhipu | `ZHIPUAI_API_KEY` | — |
+| `openrouter` | OpenRouter | `OPENROUTER_API_KEY` | — |
+| `ollama` | local Ollama | none | — |
+| `custom` | any OpenAI-compatible endpoint | `ENVREVIEW_API_KEY` + `ENVREVIEW_API_BASE_URL` | — |
+
+Where there is no default, pass `--model`; `api-check --provider <p> --models` lists the ids a
+key can use, and `api-check --provider <p> --model <id>` tests the setup with two tiny calls.
+A provider's base URL can be overridden with `ENVREVIEW_<PROVIDER>_BASE_URL` (e.g. a regional
+endpoint); the standard `OPENAI_BASE_URL` is deliberately ignored.
+
 ## The index pack
 
 **About 40,000 research papers** published 2015–2026 in the seven journals: DOI, title, abstract,

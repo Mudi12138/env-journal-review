@@ -1538,6 +1538,10 @@ def make_client(provider: str) -> Any:
     return OpenAI(**kwargs)
 
 
+# replaced by envreview.providers.install() with a parser that tolerates ```json fences
+loads_json = json.loads
+
+
 class SchemaMismatchError(ValueError):
     """A JSON-mode answer that does not match the schema (repairable, like an evidence gate)."""
 
@@ -1589,7 +1593,8 @@ def _call_structured(
             f"refusal={getattr(choice.message, 'refusal', None)!r})"
         )
     try:
-        data = json.loads(content)
+        # a provider without strict schema mode may wrap the JSON in fences or a sentence
+        data = json.loads(content) if spec["json_schema"] else loads_json(content)
     except json.JSONDecodeError as exc:
         raise SchemaMismatchError(f"answer is not valid JSON: {exc}") from exc
     if not spec["json_schema"]:

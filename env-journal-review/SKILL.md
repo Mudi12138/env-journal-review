@@ -26,12 +26,17 @@ command takes `--run <run directory>`; all files live there, so any step can be 
   defaults so they can simply say "defaults"):
   1. **Target journal** — required if not named.
   2. **Who writes the reviews** — *this agent* (default: no extra cost, takes 20–40 minutes) or
-     *a model API* (OpenAI `gpt-5.6-sol` or DeepSeek `deepseek-v4-pro` / `deepseek-flash`; needs
-     `OPENAI_API_KEY` or `DEEPSEEK_API_KEY` in the environment). For the API, run
-     `$ENVR api-run --input <file> --journal "<journal>" --tag <name> --model <model>` first:
-     it only prints a cost estimate. Show it, and run again with `--yes` only after the user
-     agrees; add `--letter` if they chose one. That command does every step below by itself,
-     so then go straight to step 5.
+     *a model API*: OpenAI, Claude, Gemini, DeepSeek, Qwen, Doubao, Kimi, GLM, OpenRouter, a local
+     Ollama, or any OpenAI-compatible endpoint. If the user picks the API:
+     - `$ENVR api-check --list` shows each provider, its default model and whether its key is
+       set (keys are environment variables, e.g. `DEEPSEEK_API_KEY`; never ask the user to paste
+       a key into the chat). `$ENVR api-check --provider <p> --models` lists model ids.
+     - `$ENVR api-check --provider <p> [--model <id>]` makes two tiny calls to confirm it works.
+     - `$ENVR api-run --input <file> --journal "<journal>" --tag <name> --provider <p>
+       [--model <id>]` without `--yes` only prints a cost estimate (tokens, and dollars when the
+       price is known). Show it; run again with `--yes` only after the user agrees, adding
+       `--letter` if they chose one. That command does every step below by itself, so then go
+       straight to step 5.
   3. **Editor's letter** consolidating the three reviews — off by default.
   4. **Other journals** — whether to also see how the editor's screening fares at any of the
      other six journals (default: no).

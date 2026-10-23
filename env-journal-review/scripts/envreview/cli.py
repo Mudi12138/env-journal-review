@@ -478,6 +478,11 @@ def cmd_index_download(a):
         sys.exit("Some files do not match the manifest; run index-download again.")
 
 
+def cmd_api_check(a):
+    from .api import check
+    check(a)
+
+
 def cmd_api_run(a):
     from .api import run
     run(a)
@@ -519,13 +524,21 @@ def main(argv=None):
     sp.add_parser("index-download", help="fetch and verify the index pack (about 690 MB, once)")
     sp.add_parser("setup", help="create ~/.envreview/venv with the required packages (once)")
     lit.add_parser(sp)
+    p = sp.add_parser("api-check", help="test a provider/model with two tiny calls (--list: providers)")
+    p.add_argument("--provider")
+    p.add_argument("--model")
+    p.add_argument("--max-tokens", type=int)
+    p.add_argument("--list", action="store_true")
+    p.add_argument("--models", action="store_true",
+                   help="list the provider's model ids (filtered by --model text if given)")
     p = sp.add_parser("api-run", help="run every step with a model API (estimate unless --yes)")
     p.add_argument("--input", required=True)
     p.add_argument("--journal", required=True)
     p.add_argument("--tag", required=True)
-    p.add_argument("--model", default="gpt-5.6-sol",
-                   help="gpt-5.6-sol (OPENAI_API_KEY) or deepseek-v4-pro / deepseek-flash "
-                        "(DEEPSEEK_API_KEY)")
+    p.add_argument("--provider", help="openai, claude, gemini, deepseek, qwen, doubao, kimi, glm, "
+                                      "openrouter, ollama or custom (see api-check --list)")
+    p.add_argument("--model", help="model id; defaults to the provider's preset if it has one")
+    p.add_argument("--max-tokens", type=int, help="override the output limit sent to the provider")
     p.add_argument("--yes", action="store_true", help="actually run (paid)")
     p.add_argument("--letter", action="store_true",
                    help="also write the editor's decision letter (off by default)")
@@ -545,7 +558,7 @@ def main(argv=None):
      "report": cmd_report, "index-info": cmd_index_info, "index-download": cmd_index_download,
      "setup": lambda a: sys.exit("Run setup as: python scripts/envreview.py setup"),
      "lit": lambda a: lit.cmd(a, index()),
-     "api-run": cmd_api_run}[a.cmd](a)
+     "api-run": cmd_api_run, "api-check": cmd_api_check}[a.cmd](a)
 
 
 if __name__ == "__main__":

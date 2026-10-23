@@ -1,11 +1,13 @@
 """API mode: run the whole review with a model API instead of the host agent.
 
 Same prompts, retrieval, validation and outputs as the agent workflow; every step that the
-agent would do is one model call here. Providers: OpenAI (OPENAI_API_KEY) and DeepSeek
-(DEEPSEEK_API_KEY). Without --yes it only prints a cost estimate.
+agent would do is one model call here. Providers: OpenAI, Claude, Gemini, DeepSeek, Qwen,
+Doubao, Kimi, GLM, OpenRouter, Ollama, or any OpenAI-compatible endpoint (see providers.py).
+Without --yes it only prints a cost estimate.
 
-  python scripts/envreview.py api-run --input paper.pdf --journal "Water Research" \
-      --tag mypaper --model gpt-5.6-sol [--yes]
+  python scripts/envreview.py api-check --list                       # providers and keys found
+  python scripts/envreview.py api-check --provider deepseek          # is the key/model usable?
+  python scripts/envreview.py api-run --input paper.pdf --journal "Water Research"       --tag mypaper --provider deepseek [--model deepseek-v4-pro] [--letter] [--yes]
 """
 from __future__ import annotations
 
@@ -17,6 +19,7 @@ from pathlib import Path
 
 from . import cli
 from . import common as C
+from . import providers as P
 from . import reviewer_prompts as RP
 
 # USD per million tokens (input, output); DeepSeek at peak price (upper bound)
@@ -30,9 +33,14 @@ precise terms for an exact-match search (a generic term found in hundreds of abs
 about 40,000 research papers from seven leading environmental journals."""
 
 
+# set by run() / check(): the provider every call in this process uses
+PROVIDER = {"name": None}
+
+
 def _client(model):
     E = cli.editor_mod()
-    provider = E.provider_for(model)
+    P.install(E, PROVIDER.get("max_tokens"))
+    provider = PROVIDER["name"] or P.resolve(None, model)[0]
     return E, E.make_client(provider), provider
 
 
@@ -51,7 +59,56 @@ def call_text(model, system, user):
     if E.PROVIDERS[provider]["reasoning_effort"]:
         kw["reasoning_effort"] = "high"
     r = client.chat.completions.create(**kw)
+    if not getattr(r, "choices", None) or not r.choices[0].message.content:
+        raise RuntimeError(f"{provider} returned an empty answer")
     return r.choices[0].message.content.strip(), E._usage_dict(r)
+
+
+CHECK_SCHEMA = {"name": "check", "strict": True, "schema": {
+    "type": "object", "additionalProperties": False, "required": ["ok", "journal"],
+    "properties": {"ok": {"type": "boolean"}, "journal": {"type": "string"}}}}
+
+
+def check(a):
+    """One tiny structured call and one text call: is the key, endpoint and model usable?"""
+    import time
+
+    if a.list:
+        rows = [{"provider": n, "service": s["label"], "default_model": s["model"] or "(give --model)",
+                 "key": P.key_status(n)} for n, s in P.PRESETS.items()]
+        print(json.dumps(rows, ensure_ascii=False, indent=1))
+        return
+    if a.models:
+        provider = a.provider or P.resolve(None, a.model or "x")[0]
+        try:
+            ids = sorted(m.id for m in P.Client(provider).raw.models.list())
+        except Exception as exc:
+            sys.exit(f"{provider} does not list its models here ({type(exc).__name__}); "
+                     "see the provider's documentation for model ids.")
+        flt = (a.model or "").lower()
+        print("\n".join(i for i in ids if flt in i.lower()))
+        return
+    provider, model = P.resolve(a.provider, a.model)
+    PROVIDER.update(name=provider, max_tokens=a.max_tokens)
+    out = {"provider": provider, "model": model, "endpoint": P.base_url(provider) or "api.openai.com",
+           "json_mode": P.PRESETS[provider]["json"]}
+    t = time.time()
+    try:
+        data, _ = call_json(model, "Answer in JSON.", "Is Water Research an environmental "
+                            "journal? Set ok accordingly and name the journal.", CHECK_SCHEMA)
+        out["structured_answer"] = data
+        text, usage = call_text(model, "Reply in one short sentence.", "Say hello.")
+        out["text_answer"] = text[:120]
+        out["seconds"] = round(time.time() - t, 1)
+        out["ok"] = True
+    except SystemExit:
+        raise
+    except Exception as exc:                      # report the provider's own message
+        out["ok"] = False
+        out["error"] = f"{type(exc).__name__}: {str(exc)[:400]}"
+    print(json.dumps(out, ensure_ascii=False, indent=1))
+    if not out["ok"]:
+        sys.exit(1)
 
 
 def estimate(chars, model):
@@ -59,16 +116,25 @@ def estimate(chars, model):
     ms = chars / 4
     tin = ms * 13 + 3 * (8_000 + 5 * 15_000) + 30_000
     tout = 60_000
-    pin, pout = PRICES.get(model, (4.0, 20.0))
-    return {"input_tokens": int(tin), "output_tokens": tout,
-            "usd": round(tin / 1e6 * pin + tout / 1e6 * pout, 2)}
+    out = {"input_tokens": int(tin), "output_tokens": tout}
+    if model in PRICES:
+        pin, pout = PRICES[model]
+        out["usd"] = round(tin / 1e6 * pin + tout / 1e6 * pout, 2)
+    else:
+        out["usd"] = None
+        out["note"] = "price unknown for this model: multiply the tokens by the provider's prices"
+    return out
 
 
 def run(a):
     from . import manuscript as M
+    provider, a.model = P.resolve(a.provider, a.model)
+    PROVIDER.update(name=provider, max_tokens=a.max_tokens)
+    P.install(cli.editor_mod(), a.max_tokens)
     chars = len(M.read_text(Path(a.input)))
     est = estimate(chars, a.model)
-    print(json.dumps({"model": a.model, "estimate": est}, indent=1))
+    print(json.dumps({"provider": provider, "model": a.model, "key": P.key_status(provider),
+                      "estimate": est}, indent=1))
     if not a.yes:
         print("Estimate only. Add --yes to run.")
         return
@@ -94,7 +160,7 @@ def run(a):
     E, pack, journal, tier = cli._editor_inputs(run, st["journal_id"])
     res = E.execute({st["tag"]: pack}, {st["journal_id"]: journal}, {tier["tier_id"]: tier},
                     a.model, "high", 1, None, run.dir / "editor" / "api",
-                    E.provider_for(a.model), 5)
+                    provider, 5)
     rec = next(iter(res["results"].values()), None)
     if rec:
         log(rec["usage"])
@@ -151,9 +217,11 @@ def run(a):
         pass
     cli.cmd_report(Namespace(run=str(run_dir)))
     tin, tout = sum(x for x, _ in usage), sum(y for _, y in usage)
-    pin, pout = PRICES.get(a.model, (4.0, 20.0))
-    print(json.dumps({"calls": len(usage), "input_tokens": tin, "output_tokens": tout,
-                      "usd_approx": round(tin / 1e6 * pin + tout / 1e6 * pout, 2)}, indent=1))
+    done = {"calls": len(usage), "input_tokens": tin, "output_tokens": tout}
+    if a.model in PRICES:
+        pin, pout = PRICES[a.model]
+        done["usd_approx"] = round(tin / 1e6 * pin + tout / 1e6 * pout, 2)
+    print(json.dumps(done, indent=1))
 
 
 def _quiet(fn, ns):
